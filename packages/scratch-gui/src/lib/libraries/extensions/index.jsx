@@ -406,4 +406,18 @@ export default [
         helpLink: 'https://scratch.mit.edu/vernier',
         tags: ["Made by Scratch"]
     },
+    {
+        name: 'Basketball/Rim Detector',
+        extensionId: '',
+        collaborator: 'SportSense - tiilt Lab @ Northwestern University',
+        iconURL: null,
+        description: (
+            <FormattedMessage
+                defaultMessage = "This extension can detect if there is a basketball or rim in your camera output. SportSense | tiilt Lab"
+                id="bball.defaultMessage"
+                description = "Messaging to describe extension."
+            />
+        ),
+        helpLink: 'https://tiilt.northwestern.edu'
+    },
 ];

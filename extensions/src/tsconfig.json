@@ -21,5 +21,5 @@
     ".**/*.ts",
     "**/*.ts",
     "./declaration.d.ts"
-  ],
+, "basketball-detect/edge-impulse/eiclassifier.js"  ],
 }

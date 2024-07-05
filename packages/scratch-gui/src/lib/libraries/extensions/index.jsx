@@ -93,7 +93,8 @@ export default [
                 id="gui.extension.microbit-robot.description"
             />
         ),
-        featured: true
+        featured: true,
+        tags: ["tiilt Lab"]
     },
 
     {
@@ -114,7 +115,8 @@ export default [
                id="gui.extension.gameball.description"
            />
        ),
-       featured: true
+       featured: true,
+       tags: ["tiilt Lab"]
    },
 
     {
@@ -234,7 +236,8 @@ export default [
                 id="gui.extension.pose_hand.description"
             />
         ),
-        featured: true
+        featured: true,
+        tags: ["tiilt Lab"]
     },
     {
         name: "Face Sensing",
@@ -248,7 +251,8 @@ export default [
                 id="gui.extension.pose_face.description"
             />
         ),
-        featured: true
+        featured: true,
+        tags: ["tiilt Lab"]
     },
     {
         name: "Body Sensing",
@@ -262,7 +266,8 @@ export default [
                 id="gui.extension.pose_body.description"
             />
         ),
-        featured: true
+        featured: true,
+        tags: ["tiilt Lab"]
     },
 
     {
@@ -487,15 +492,24 @@ export default [
     {
         name: 'Basketball/Rim Detector',
         extensionId: 'bballDetect',
-        collaborator: 'SportSense - tiilt Lab @ Northwestern University',
         iconURL: bballIconUrl,
+        insetIconURL: bballIconUrl,
         description: (
             <FormattedMessage
-                defaultMessage = "This extension can detect if there is a basketball or rim in your camera output. SportSense | tiilt Lab"
-                id="bball.defaultMessage"
+                defaultMessage = "Detect basketballs or rims in your camera's video feed. SportSense | tiilt Lab"
                 description = "Messaging to describe extension."
+                id="bball.defaultMessage"
             />
         ),
-        helpLink: 'https://tiilt.northwestern.edu'
+        featured: true,
+        disabled: false,
+        bluetoothRequired: false,
+        internetConnectionRequired: false,
+        launchPeripheralConnectionFlow: false,
+        useAutoScan: false,
+        connectionIconURL: gdxforConnectionIconURL,
+        connectionSmallIconURL: gdxforConnectionSmallIconURL,
+        helpLink: 'https://tiilt.northwestern.edu',
+        tags: ["tiilt Lab"]
     },
 ];

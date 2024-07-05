@@ -33,6 +33,10 @@ const builtinExtensions = {
     arduinoRobot: () => require('../extensions/scratch3_arduinobot'),
     gizmoRobot: () => require('../extensions/scratch3_gizmo'),
     microbitRobot: () => require('../extensions/scratch3_microbot'),
+    poseFace: () => require('../extensions/scratch3_pose_face'),
+    poseHand: () => require('../extensions/scratch3_pose_hand'),
+    poseBody: () => require('../extensions/scratch3_pose_body'),
+    gameballExt: () => require("../extensions/scratch3_gameball"),
 };
 
 /**

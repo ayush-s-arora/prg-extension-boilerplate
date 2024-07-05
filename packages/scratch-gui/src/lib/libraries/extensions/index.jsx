@@ -5,6 +5,10 @@ import generatedDetails from '../../../generated/details.generated';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
+import poseBodyBlocksIconURL from './posenet/pose-body.png';
+import poseHandBlocksIconURL from './posenet/pose-hand.png';
+import poseFaceBlocksIconURL from './posenet/pose-face.png';
+
 import arduinoRobotIconURL from './arduino_extension/arduino_extension.png';
 import arduinoRobotInsetIconURL from './arduino_extension/arduino_small.svg';
 
@@ -22,11 +26,18 @@ import penInsetIconURL from './pen/pen-small.svg';
 import videoSensingIconURL from './videoSensing/video-sensing.png';
 import videoSensingInsetIconURL from './videoSensing/video-sensing-small.svg';
 
+import poseHandInsetIconURL from './posenet/pose-hand-small-3.svg';
+import poseFaceInsetIconURL from './posenet/pose-face-small.svg';
+import poseBodyInsetIconURL from './posenet/pose-body-small.svg';
+
 import text2speechIconURL from './text2speech/text2speech.png';
 import text2speechInsetIconURL from './text2speech/text2speech-small.svg';
 
 import translateIconURL from './translate/translate.png';
 import translateInsetIconURL from './translate/translate-small.png';
+
+import gameballIconURL from './gameball/gb.png';
+import gameballInsetIconURL from './gameball/gb.svg';
 
 import makeymakeyIconURL from './makeymakey/makeymakey.png';
 import makeymakeyInsetIconURL from './makeymakey/makeymakey-small.svg';
@@ -58,6 +69,8 @@ import gdxforInsetIconURL from './gdxfor/gdxfor-small.svg';
 import gdxforConnectionIconURL from './gdxfor/gdxfor-illustration.svg';
 import gdxforConnectionSmallIconURL from './gdxfor/gdxfor-small.svg';
 
+import bballIconUrl from './basketball-detect/logo.png';
+
 export default [
     /* DO NOT REMOVE */
     ...generatedDetails,
@@ -65,8 +78,8 @@ export default [
     {
         name: (
             <FormattedMessage
-                defaultMessage="PRG Microbit Robot"
-                description="Name for the 'Microbit Robot' Extension"
+                defaultMessage="Microbit tiilt"
+                description="Name for the tiilt 'Microbit' Extension"
                 id="gui.extension.microbit-robot.name"
             />
         ),
@@ -75,14 +88,35 @@ export default [
         insetIconURL: microbitInsetIconURL,
         description: (
             <FormattedMessage
-                defaultMessage="Use Scratch to program a Microbit smart car robot"
-                description="PRG Microbit Robot description"
+                defaultMessage="Use Microbits to control your Scratch games and creations!"
+                description="tiilt microbit scratch extension"
                 id="gui.extension.microbit-robot.description"
             />
         ),
-        featured: true,
-        tags: ["Made by PRG"]
+        featured: true
     },
+
+    {
+        name: (
+           <FormattedMessage
+               defaultMessage="Play Impossible Gameball"
+               description="play impossible gameball data extension"
+               id="gui.extension.gameball.name"
+           />
+       ),
+       extensionId: 'gameballExt',
+       iconURL: gameballIconURL,
+       insetIconURL: gameballInsetIconURL,
+       description: (
+           <FormattedMessage
+               defaultMessage="Use the PlayImpossible Gameball to make games"
+               description="tiilt PlayImpossible gameball extension"
+               id="gui.extension.gameball.description"
+           />
+       ),
+       featured: true
+   },
+
     {
         name: (
             <FormattedMessage
@@ -187,6 +221,50 @@ export default [
         featured: true,
         tags: ["Made by Scratch"]
     },
+
+    {
+        name: "Hand Sensing",
+        extensionId: 'poseHand',
+        iconURL: poseHandBlocksIconURL,
+        insetIconURL: poseHandInsetIconURL,
+        description: (
+            <FormattedMessage
+                defaultMessage="Sense hand movement with the camera."
+                description="PoseNet Description"
+                id="gui.extension.pose_hand.description"
+            />
+        ),
+        featured: true
+    },
+    {
+        name: "Face Sensing",
+        extensionId: 'poseFace',
+        iconURL: poseFaceBlocksIconURL,
+        insetIconURL: poseFaceInsetIconURL,
+        description: (
+            <FormattedMessage
+                defaultMessage="Sense face movement with the camera."
+                description="PoseNet Description"
+                id="gui.extension.pose_face.description"
+            />
+        ),
+        featured: true
+    },
+    {
+        name: "Body Sensing",
+        extensionId: 'poseBody',
+        iconURL: poseBodyBlocksIconURL,
+        insetIconURL: poseBodyInsetIconURL,
+        description: (
+            <FormattedMessage
+                defaultMessage="Sense body position with the camera."
+                description="PoseNet Description"
+                id="gui.extension.pose_body.description"
+            />
+        ),
+        featured: true
+    },
+
     {
         name: (
             <FormattedMessage
@@ -408,9 +486,9 @@ export default [
     },
     {
         name: 'Basketball/Rim Detector',
-        extensionId: '',
+        extensionId: 'bballDetect',
         collaborator: 'SportSense - tiilt Lab @ Northwestern University',
-        iconURL: null,
+        iconURL: bballIconUrl,
         description: (
             <FormattedMessage
                 defaultMessage = "This extension can detect if there is a basketball or rim in your camera output. SportSense | tiilt Lab"

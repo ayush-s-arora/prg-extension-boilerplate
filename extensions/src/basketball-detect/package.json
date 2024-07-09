@@ -1,0 +1,15 @@
+{
+  "name": "basketball-detect-extension",
+  "version": "1.0.0",
+  "description": "An extension created using the PRG AI Blocks framework",
+  "main": "index.ts",
+  "scripts": {
+    "directory": "echo basketball-detect",
+    "test": "npm run test --prefix ../../ -- basketball-detect/index.test.ts",
+    "dev": "npm run dev --prefix ../../../ -- --include basketball-detect",
+    "add:ui": "npm run add:ui --prefix ../../../  -- basketball-detect",
+    "add:arg": "npm run --prefix ../../../-- basketball-detect"
+  },
+  "author": "",
+  "license": "ISC"
+}

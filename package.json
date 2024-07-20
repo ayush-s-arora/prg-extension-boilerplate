@@ -30,6 +30,7 @@
     "tsconfig-paths": "^4.1.1",
     "tslib": "^2.4.1",
     "typescript": "latest",
+    "webpack-cli": "^5.1.4",
     "yargs": "^17.7.2"
   },
   "overrides": {
@@ -41,6 +42,8 @@
     "@tensorflow-models/hand-pose-detection": "^2.0.1",
     "@tensorflow-models/pose-detection": "^2.1.3",
     "@tensorflow/tfjs": "^4.20.0",
-    "wasm-tools": "^0.2.1"
+    "@tensorflow/tfjs-converter": "^4.20.0",
+    "wasm-tools": "^0.2.1",
+    "webpack": "^5.93.0"
   }
 }

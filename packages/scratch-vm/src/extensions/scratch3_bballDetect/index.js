@@ -7,18 +7,17 @@ const Cast = require('../../util/cast');
 const formatMessage = require('format-message');
 const Video = require('../../io/video');
 // const posenet = require('@tensorflow-models/posenet');
-const poseDetection = require('@tensorflow-models/pose-detection');  
-
-const bballDetect = require('../../extensions/scratch3_bballDetect/edge-impulse-bball/edge-impulse-standalone.js');
-
+const poseDetection = require('@tensorflow-models/pose-detection');
 const tf = require('@tensorflow/tfjs');
-// require("@tensorflow/tfjs-backend-webgl");
+const bballDetect = require('../../extensions/scratch3_bballDetect/tf-bball-detect/tfmodel.json');
+const modelUrl = 'http://localhost:8080/tfmodel.json';
+require("@tensorflow/tfjs-backend-webgl");
 tf.setBackend('webgl');
+
 
 function friendlyRound(amount) {
     return Number(amount).toFixed(2);
 }
-
 
 /// TODO: add value reporter blocks of x and y of different joints
 
@@ -86,6 +85,35 @@ const EXTENSION_ID = 'bballDetect';
  * @constructor
  */
 class Scratch3BballDetectBlocks {
+    // async loadAndPredict() {
+    //     const modelUrl = 'http://localhost:8080/tfmodel.json';
+    //     const model = await tf.loadLayersModel(modelUrl);
+    //     console.log('Model loaded successfully');
+    
+    //     // Example input for grayscale data
+    //     const height = 96;
+    //     const width = 96;
+    //     const channels = 3; // RGB
+    
+    //     // Assuming you have grayscale data with shape [96, 96]
+    //     const grayscaleData = new Float32Array();
+    
+    //     // Convert grayscale to RGB
+    //     const rgbData = new Float32Array(height * width * channels);
+    //     for (let i = 0; i < height * width; i++) {
+    //         const value = grayscaleData[i];
+    //         rgbData[i * 3] = value;       // R channel
+    //         rgbData[i * 3 + 1] = value;   // G channel
+    //         rgbData[i * 3 + 2] = value;   // B channel
+    //     }
+    
+    //     const input = tf.tensor4d(rgbData, [1, height, width, channels]);
+    
+    //     const prediction = model.predict(input);
+    //     prediction.print();
+    // }    
+    
+
     constructor (runtime) {
         /**
          * The runtime instantiating this block package.
@@ -93,22 +121,14 @@ class Scratch3BballDetectBlocks {
          */
         this.runtime = runtime;
 
-        this.runtime.registerPeripheralExtension(EXTENSION_ID, this);
-        this.runtime.connectPeripheral(EXTENSION_ID, 0);
-        this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
-
         /**
          * A flag to determine if this extension has been installed in a project.
          * It is set to false the first time getInfo is run.
          * @type {boolean}
          */
         this.firstInstall = true;
-
-        if (this.runtime.ioDevices) {
-            this.runtime.on(Runtime.PROJECT_LOADED, this.projectStarted.bind(this));
-            this.runtime.on(Runtime.PROJECT_RUN_START, this.reset.bind(this));
-            this._loop();
-        }
+        myTimer01 = setInterval(this.myPicturenow, this.globalDetectionRate);
+        // this.renderPrediction();
     }
 
     /**
@@ -128,7 +148,7 @@ class Scratch3BballDetectBlocks {
      * @type {string}
      */
     static get STATE_KEY () {
-        return 'Scratch.poseNet';
+        return 'Scratch.bballDetect';
     }
 
     /**
@@ -262,6 +282,96 @@ class Scratch3BballDetectBlocks {
 
       return input;
     };
+
+    async RGBAToHex(r,g,b,a) {
+        r = r.toString(16);
+        g = g.toString(16);
+        b = b.toString(16);
+      
+        if (r.length == 1)
+          r = "0" + r;
+        if (g.length == 1)
+          g = "0" + g;
+        if (b.length == 1)
+          b = "0" + b;
+      
+       // return "#" + r + g + b + ", " ;
+        return "0x" + r + g + b + ", " ;
+             
+      }
+
+    //   async renderPrediction (){   
+  
+    //     document.ctx.clearRect(0, 0, document.ctx.canvas.width, document.ctx.canvas.width);
+      
+      
+    //     document.ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+    //     ctxFull.drawImage(video, 0, 0, videoWidth, videoHeight);
+       
+       
+    //    let imgData = document.ctx.getImageData(0, 0, document.ctx.canvas.width, document.ctx.canvas.height);
+    //    let pixels = imgData.data;
+    //    for (var i = 0; i < pixels.length; i += 4) {
+     
+    //      let lightness = parseInt((pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3);
+     
+    //      pixels[i] = lightness;
+    //      pixels[i + 1] = lightness;
+    //      pixels[i + 2] = lightness;
+    //    }
+        
+    //    document.ctx.scale(-1, 1);  // mirror image
+    //    document.ctx.putImageData(imgData, 0, 0);
+            
+    //    requestAnimationFrame(renderPrediction);
+          
+        
+    //  }; 
+
+     async scaleImageData(imagedata, targetWidth, targetHeight) {
+        const offScreenCanvas = document.createElement('canvas');
+        offScreenCanvas.width = imagedata.width;
+        offScreenCanvas.height = imagedata.height;
+        const offScreenCtx = offScreenCanvas.getContext('2d');
+    
+        offScreenCtx.putImageData(imagedata, 0, 0);
+    
+        const scaledCanvas = document.createElement('canvas');
+        scaledCanvas.width = targetWidth;
+        scaledCanvas.height = targetHeight;
+        const scaledCtx = scaledCanvas.getContext('2d');
+    
+        scaledCtx.drawImage(offScreenCanvas, 0, 0, targetWidth, targetHeight);
+    
+        return scaledCtx.getImageData(0, 0, targetWidth, targetHeight);
+    }
+    
+    // async myPicturenow() {
+    //    var classifier = await tf.loadLayersModel(modelUrl);
+       
+    //    let props = classifier.getProperties();
+       
+    //    scaledSquareDimension = props.input_width;
+    //    document.getElementById('myWidthHeight').value = props.input_width;
+    //    let myBestClassificationNumber = -1  
+    //    let myBestClassificationValue = 0.25   // lowest best allowable value 
+    //    for (let j = 0;  j < results.results.length; j++){  
+    //        if (results.results[j].value > myBestClassificationValue ){
+    //            myBestClassificationNumber = j;                      // find the biggest array value
+    //            myBestClassificationValue = results.results[j].value  
+    //        }
+    //    }
+    //     if (CONTDETECTIONSTATE == OFF) {
+    //         myOutputString = test;
+    //     } else {      
+    //         for (var i = 0; i < pixels2.length; i += 4) {
+    //             myOutputString += RGBAToHex(ImageData2.data[i], ImageData2.data[i+1], ImageData2.data[i+2], ImageData2.data[i+3]);
+    //             myOutputString = myOutputString.substring(0, myOutputString.length - 2);  // remove last ,"
+    //             document.getElementById('myTextArea01').value = myOutputString;
+    //         }
+    //     };
+    //    results = await classifier.classify( myOutputString.split(', ')   );
+    // }
 
 
     async ensureBodyModelLoaded() {
@@ -420,7 +530,7 @@ class Scratch3BballDetectBlocks {
         if (this.firstInstall) {
             this.globalVideoState = VideoState.ON;
             this.globalVideoTransparency = 50;
-            this.globalDetectionRate = 133;
+            this.globalDetectionRate = 130;
             this.projectStarted();
             this.firstInstall = false;
             this._bodyModel = null;
@@ -432,8 +542,8 @@ class Scratch3BballDetectBlocks {
             id: EXTENSION_ID,
             name: formatMessage({
                 id: 'posenet.categoryName',
-                default: 'Body Pose Sensing',
-                description: 'Label for PoseNet category'
+                default: 'Basketball/Rim Detection',
+                description: 'Label for tiilt Basketball/Rim Detection'
             }),
             showStatusButton: true,
             blockIconURI: blockIconURI,
@@ -569,9 +679,9 @@ class Scratch3BballDetectBlocks {
                     }),
                     arguments: {
                         CONTDETECTIONSTATE: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'VIDEO_STATE',
-                            defaultValue: VideoState.OFF
+                            type: ArgumentType.STRING,
+                            menu: 'CONTINUOUS',
+                            defaultValue: 'on'
                         }
                     }
                 }
@@ -620,6 +730,13 @@ class Scratch3BballDetectBlocks {
                 VIDEO_STATE: {
                     acceptReporters: true,
                     items: this._buildMenu(this.VIDEO_STATE_INFO)
+                },
+                CONTINUOUS: {
+                    acceptReporters: true,
+                    items: [
+                        {text: 'on', value: 'on'},
+                        {text: 'off', value: 'off'}
+                    ]
                 }
             }
         };
@@ -854,5 +971,4 @@ class Scratch3BballDetectBlocks {
         //todo
     }
 }
-
 module.exports = Scratch3BballDetectBlocks;

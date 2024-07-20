@@ -1,7 +1,6 @@
 import { ArgumentType, BlockType, Environment, ExtensionMenuDisplayDetails, extension, block, untilTimePassed } from "$common";
 // import BlockUtility from "$scratch-vm/engine/block-utility";
 import { getImageHelper, initializeObjectDetector } from './utils';
-import { EdgeImpulseClassifier } from "./edge-impulse/eiclassifier";
 
 /** 👋 Hi!
 
@@ -76,8 +75,7 @@ export default class Basketball_RimDetector extends extension(details, "video", 
         await untilTimePassed(this.myFrequencyMs - elapsed);
         this.clearFrame()
       }
-    }
-
+    } 
     clearFrame() {
       while (this.drawables.length > 0) this.drawables.shift().destroy();
     }
@@ -87,6 +85,15 @@ export default class Basketball_RimDetector extends extension(details, "video", 
       const rects = imageHelper.createRects(detections.detections, "white", 5);
       drawables.push(this.createDrawable(rects));
     }
+    async initEdgeImpulseModel() {
+      const modelUrl = './edge-impulse/edge-impulse-standalone.wasm';
+      const response = await fetch(modelUrl);
+      const buffer = await response.arrayBuffer();
+      const model = await WebAssembly.instantiate(buffer);
+  
+      return model.instance.exports;
+    }
+  
 
   @block({
     type: "command",
@@ -106,7 +113,7 @@ export default class Basketball_RimDetector extends extension(details, "video", 
 
   @block({
     type: BlockType.Command,
-    text: (state) => `Freeze Detection ${state}`,
+    text: (state) => `Detection ${state}`,
     arg: { type: ArgumentType.Boolean, options: [{ text: 'on', value: true }, { text: 'off', value: false }] }
   })
   async continuouslyDetectObjects(state: boolean) {

@@ -22,32 +22,49 @@ const base = {
         filename: '[name].js'
     },
     module: {
-        rules: [{
-            test: /\.js$/,
-            loader: 'babel-loader',
-            include: path.resolve(__dirname, 'src'),
-            options: {
-                // Explicitly disable babelrc so we don't catch various config
-                // in much lower dependencies.
-                babelrc: false,
-                plugins: [
-                    '@babel/plugin-syntax-dynamic-import',
-                    '@babel/plugin-transform-async-to-generator',
-                    '@babel/plugin-proposal-object-rest-spread',
-                    '@babel/plugin-proposal-optional-chaining'
-                ],
-                presets: ['@babel/preset-env']
+        rules: [
+            {
+                test: /\.js$/,
+                loader: 'babel-loader',
+                include: path.resolve(__dirname, 'src'),
+                options: {
+                    babelrc: false,
+                    plugins: [
+                        '@babel/plugin-syntax-dynamic-import',
+                        '@babel/plugin-transform-async-to-generator',
+                        '@babel/plugin-proposal-object-rest-spread',
+                        '@babel/plugin-proposal-optional-chaining'
+                    ],
+                    presets: ['@babel/preset-env']
+                },
+                query: {
+                    presets: [['@babel/preset-env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}]]
+                }
             },
-            query: {
-                presets: [['@babel/preset-env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}]]
+            {
+                test: /\.mp3$/,
+                loader: 'file-loader'
+            },
+            {
+                test: /\.ts$/,
+                loader: 'ignore-loader'
+            },
+            {
+                test: /\.wasm$/,
+                type: 'javascript/auto',
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[hash].[ext]',
+                        }
+                    },
+                    {
+                        loader: 'wasm-loader'
+                    }
+                ]
             }
-        },
-        {
-            test: /\.mp3$/,
-            loader: 'file-loader'
-        },
-        { test: /\.ts$/, loader: 'ignore-loader' }
-    ]
+        ]
     },
     optimization: {
         minimizer: [
@@ -71,6 +88,10 @@ module.exports = [
             libraryTarget: 'umd',
             path: path.resolve('dist', 'web')
         },
+        experiments: {
+            asyncWebAssembly: true,
+            syncWebAssembly: true
+        },
         module: {
             rules: base.module.rules.concat([
                 {
@@ -89,6 +110,10 @@ module.exports = [
         output: {
             libraryTarget: 'commonjs2',
             path: path.resolve('dist', 'node')
+        },
+        experiments: {
+            asyncWebAssembly: true,
+            syncWebAssembly: true
         },
         externals: {
             'decode-html': true,
@@ -113,6 +138,10 @@ module.exports = [
         output: {
             path: path.resolve(__dirname, 'playground'),
             filename: '[name].js'
+        },
+        experiments: {
+            asyncWebAssembly: true,
+            syncWebAssembly: true
         },
         module: {
             rules: base.module.rules.concat([
@@ -150,18 +179,26 @@ module.exports = [
             hints: false
         },
         plugins: base.plugins.concat([
-            new CopyWebpackPlugin([{
-                from: 'node_modules/scratch-blocks/media',
-                to: 'media'
-            }, {
-                from: 'node_modules/scratch-storage/dist/web'
-            }, {
-                from: 'node_modules/scratch-render/dist/web'
-            }, {
-                from: 'node_modules/scratch-svg-renderer/dist/web'
-            }, {
-                from: 'src/playground'
-            }])
+            new CopyWebpackPlugin({
+                patterns: [
+                    {
+                        from: 'node_modules/scratch-blocks/media',
+                        to: 'media'
+                    },
+                    {
+                        from: 'node_modules/scratch-storage/dist/web'
+                    },
+                    {
+                        from: 'node_modules/scratch-render/dist/web'
+                    },
+                    {
+                        from: 'node_modules/scratch-svg-renderer/dist/web'
+                    },
+                    {
+                        from: 'src/playground'
+                    }
+                ]
+            })
         ])
     })
 ];

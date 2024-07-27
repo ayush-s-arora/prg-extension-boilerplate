@@ -9,7 +9,7 @@ const base = {
     },
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
     devServer: {
-        contentBase: false,
+        contentBase: path.join(__dirname, 'dist'),
         host: '0.0.0.0',
         port: process.env.PORT || 8073,
         watchOptions: {
@@ -49,21 +49,6 @@ const base = {
                 test: /\.ts$/,
                 loader: 'ignore-loader'
             },
-            {
-                test: /\.wasm$/,
-                type: 'javascript/auto',
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: '[name].[hash].[ext]',
-                        }
-                    },
-                    {
-                        loader: 'wasm-loader'
-                    }
-                ]
-            }
         ]
     },
     optimization: {
@@ -73,7 +58,6 @@ const base = {
             })
         ]
     },
-    plugins: []
 };
 
 module.exports = [
@@ -87,10 +71,6 @@ module.exports = [
         output: {
             libraryTarget: 'umd',
             path: path.resolve('dist', 'web')
-        },
-        experiments: {
-            asyncWebAssembly: true,
-            syncWebAssembly: true
         },
         module: {
             rules: base.module.rules.concat([
@@ -110,10 +90,6 @@ module.exports = [
         output: {
             libraryTarget: 'commonjs2',
             path: path.resolve('dist', 'node')
-        },
-        experiments: {
-            asyncWebAssembly: true,
-            syncWebAssembly: true
         },
         externals: {
             'decode-html': true,
@@ -138,10 +114,6 @@ module.exports = [
         output: {
             path: path.resolve(__dirname, 'playground'),
             filename: '[name].js'
-        },
-        experiments: {
-            asyncWebAssembly: true,
-            syncWebAssembly: true
         },
         module: {
             rules: base.module.rules.concat([
@@ -196,8 +168,8 @@ module.exports = [
                     },
                     {
                         from: 'src/playground'
-                    }
-                ]
+                    },
+                ]        
             })
         ])
     })

@@ -9,8 +9,7 @@ const Video = require('../../io/video');
 // const posenet = require('@tensorflow-models/posenet');
 const poseDetection = require('@tensorflow-models/pose-detection');
 const tf = require('@tensorflow/tfjs');
-const bballDetect = require('../../extensions/scratch3_bballDetect/tf-bball-detect/tfmodel.json');
-const modelUrl = 'http://localhost:8080/tfmodel.json';
+const modelUrl = './static/models/tf-bballDetect/tfmodel.json';
 require("@tensorflow/tfjs-backend-webgl");
 tf.setBackend('webgl');
 
@@ -77,6 +76,14 @@ const VideoState = {
     ON_FLIPPED: 'on-flipped'
 };
 
+const Detection = {
+    /** Model is not detecting */
+    OFF: 'off',
+
+    /**  Model is detecting */
+    ON: 'on',
+};
+
 const EXTENSION_ID = 'bballDetect';
 
 /**
@@ -85,33 +92,52 @@ const EXTENSION_ID = 'bballDetect';
  * @constructor
  */
 class Scratch3BballDetectBlocks {
-    // async loadAndPredict() {
-    //     const modelUrl = 'http://localhost:8080/tfmodel.json';
-    //     const model = await tf.loadLayersModel(modelUrl);
-    //     console.log('Model loaded successfully');
+    async loadAndPredict() {
+        const model = await tf.loadLayersModel(modelUrl);
+        console.log('Model loaded successfully');
     
-    //     // Example input for grayscale data
-    //     const height = 96;
-    //     const width = 96;
-    //     const channels = 3; // RGB
+        const height = 96;
+        const width = 96;
+        const channels = 3; // RGB
     
-    //     // Assuming you have grayscale data with shape [96, 96]
-    //     const grayscaleData = new Float32Array();
+        // // Assuming you have grayscale data with shape [96, 96]
+        // const grayscaleData = new Float32Array();
     
-    //     // Convert grayscale to RGB
-    //     const rgbData = new Float32Array(height * width * channels);
-    //     for (let i = 0; i < height * width; i++) {
-    //         const value = grayscaleData[i];
-    //         rgbData[i * 3] = value;       // R channel
-    //         rgbData[i * 3 + 1] = value;   // G channel
-    //         rgbData[i * 3 + 2] = value;   // B channel
-    //     }
+        // // Convert grayscale to RGB
+        // const rgbData = new Float32Array(height * width * channels);
+        // for (let i = 0; i < height * width; i++) {
+        //     const value = grayscaleData[i];
+        //     rgbData[i * 3] = value;       // R channel
+        //     rgbData[i * 3 + 1] = value;   // G channel
+        //     rgbData[i * 3 + 2] = value;   // B channel
+        // }
     
-    //     const input = tf.tensor4d(rgbData, [1, height, width, channels]);
     
-    //     const prediction = model.predict(input);
-    //     prediction.print();
-    // }    
+        // const prediction = model.predict(input);
+        // prediction.print();
+       scaledSquareDimension = 96;
+    //    let imageData2 =  scaleImageData(document.ctx.getImageData(0, 0, document.ctx.canvas.width, document.ctx.canvas.height), scaledSquareDimension, scaledSquareDimension);  // grab and scale COLOR image
+       let imageData2 =  tf.browser.fromPixels(this.currImage);  // grab and scale COLOR image
+       const rgbData = new Float32Array(height * width * channels);
+       let myBestClassificationNumber = -1  
+       let myBestClassificationValue = 0.25   // lowest best allowable value 
+       if (this.globalDetection === Detection.ON) {    
+            for (var i = 0; i < height * width; i++) {
+                rgbData[i * 3] = imageData2.data[i] //R
+                rgbData[i * 3 + 1] = imageData2.data[i + 1] //G
+                rgbData[i * 3 + 2] = imageData2.data[i + 2] //B 
+            }
+        };
+        // const input = tf.tensor4d(rgbData, [1, height, width, channels]);
+        // results = await model.predict(input);
+        // for (let j = 0;  j < results.results.length; j++){  
+        //     if (results.results[j].value > myBestClassificationValue ){
+        //         myBestClassificationNumber = j;                      // find the biggest array value
+        //         myBestClassificationValue = results.results[j].value  
+        //     }
+        // }
+        // results.print();
+    }    
     
 
     constructor (runtime) {
@@ -127,8 +153,14 @@ class Scratch3BballDetectBlocks {
          * @type {boolean}
          */
         this.firstInstall = true;
+        if (this.runtime.ioDevices) {
+            this.runtime.on(Runtime.PROJECT_LOADED, this.projectStarted.bind(this));
+            this.runtime.on(Runtime.PROJECT_RUN_START, this.reset.bind(this));
+            this._loop();
+        }
         myTimer01 = setInterval(this.myPicturenow, this.globalDetectionRate);
         // this.renderPrediction();
+        // this.loadAndPredict();
     }
 
     /**
@@ -242,13 +274,15 @@ class Scratch3BballDetectBlocks {
                 format: Video.FORMAT_IMAGE_DATA,
                 dimensions: Scratch3BballDetectBlocks.DIMENSIONS
             });
-
+            
             const time = +new Date();
             if (frame) {
                 this.objectCenters = {"basketball": [], "hoop": []};
-                this.poseStates = await this.estimatePoseOnImage(frame);
-                this.poseState = this.poseStates[0];
                 this.currImage = frame;
+                // this.poseStates = await this.estimatePoseOnImage(frame);
+                // this.poseState = this.poseStates[0];
+                console.log("currImage assigned");
+                await this.loadAndPredict();
                 if (this.hasPose()) {
                     this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
                 } else {
@@ -365,7 +399,7 @@ class Scratch3BballDetectBlocks {
     //         myOutputString = test;
     //     } else {      
     //         for (var i = 0; i < pixels2.length; i += 4) {
-    //             myOutputString += RGBAToHex(ImageData2.data[i], ImageData2.data[i+1], ImageData2.data[i+2], ImageData2.data[i+3]);
+    //             myOutputString += RGBAToHex(imageData2.data[i], imageData2.data[i+1], imageData2.data[i+2], imageData2.data[i+3]);
     //             myOutputString = myOutputString.substring(0, myOutputString.length - 2);  // remove last ,"
     //             document.getElementById('myTextArea01').value = myOutputString;
     //         }
@@ -519,6 +553,27 @@ class Scratch3BballDetectBlocks {
         ];
     }
 
+    get DETECTION_INFO () {
+        return [
+            {
+                name: formatMessage({
+                    id: 'detection.off',
+                    default: 'off',
+                    description: 'Option for the "Turn continuous detection [STATE]" block'
+                }),
+                value: Detection.OFF
+            },
+            {
+                name: formatMessage({
+                    id: 'detection.on',
+                    default: 'on',
+                    description: 'Option for the "Turn continuous detection [STATE]" block'
+                }),
+                value: Detection.ON
+            }
+        ];
+    }
+
     /**
      * @returns {object} metadata for this extension and its blocks.
      */
@@ -531,6 +586,7 @@ class Scratch3BballDetectBlocks {
             this.globalVideoState = VideoState.ON;
             this.globalVideoTransparency = 50;
             this.globalDetectionRate = 130;
+            this.globalDetection = true;
             this.projectStarted();
             this.firstInstall = false;
             this._bodyModel = null;
@@ -671,17 +727,17 @@ class Scratch3BballDetectBlocks {
                     }
                 },
                 {
-                    opcode: 'continuousDetection',
+                    opcode: 'setContinuousDetection',
                     text: formatMessage({
                         id: 'videoSensing.continuousDetection',
-                        default: 'Turn continuous detection [CONTDETECTIONSTATE]',
+                        default: 'Turn continuous detection [DETECTION]',
                         description: 'Controls whether model keeps detecting objects'
                     }),
                     arguments: {
-                        CONTDETECTIONSTATE: {
-                            type: ArgumentType.STRING,
-                            menu: 'CONTINUOUS',
-                            defaultValue: 'on'
+                        DETECTION: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'DETECTION',
+                            defaultValue: Detection.ON,
                         }
                     }
                 }
@@ -731,12 +787,9 @@ class Scratch3BballDetectBlocks {
                     acceptReporters: true,
                     items: this._buildMenu(this.VIDEO_STATE_INFO)
                 },
-                CONTINUOUS: {
+                DETECTION: {
                     acceptReporters: true,
-                    items: [
-                        {text: 'on', value: 'on'},
-                        {text: 'off', value: 'off'}
-                    ]
+                    items: this._buildMenu(this.DETECTION_INFO)
                 }
             }
         };
@@ -969,6 +1022,11 @@ class Scratch3BballDetectBlocks {
         const rate = Cast.toNumber(args.RATE);
         this.globalDetectionRate = rate;
         //todo
+    }
+    setContinuousDetection(args) {
+        const state = args.DETECTION;
+        this.globalDetection = state;
+        console.log("Model Detection switched " + this.globalDetection);
     }
 }
 module.exports = Scratch3BballDetectBlocks;

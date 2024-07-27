@@ -10,6 +10,7 @@ const Video = require('../../io/video');
 const poseDetection = require('@tensorflow-models/pose-detection');
 const tf = require('@tensorflow/tfjs');
 const modelUrl = './static/models/tf-bballDetect/tfmodel.json';
+const modelLoaded = false;
 require("@tensorflow/tfjs-backend-webgl");
 tf.setBackend('webgl');
 
@@ -95,9 +96,7 @@ class Scratch3BballDetectBlocks {
     async loadAndPredict() {
         const model = await tf.loadLayersModel(modelUrl);
         console.log('Model loaded successfully');
-    
-        const height = 96;
-        const width = 96;
+
         const channels = 3; // RGB
     
         // // Assuming you have grayscale data with shape [96, 96]
@@ -116,18 +115,53 @@ class Scratch3BballDetectBlocks {
         // const prediction = model.predict(input);
         // prediction.print();
        scaledSquareDimension = 96;
-    //    let imageData2 =  scaleImageData(document.ctx.getImageData(0, 0, document.ctx.canvas.width, document.ctx.canvas.height), scaledSquareDimension, scaledSquareDimension);  // grab and scale COLOR image
-       let imageData2 =  tf.browser.fromPixels(this.currImage);  // grab and scale COLOR image
-       const rgbData = new Float32Array(height * width * channels);
+       let imageData2 =  tf.browser.fromPixels(this.currImage);  // grab color image
+       imageData2 = tf.image.resizeBilinear(imageData2, [scaledSquareDimension, scaledSquareDimension]); //scale image
+       const rgbData = new Float32Array(scaledSquareDimension * scaledSquareDimension * channels);
        let myBestClassificationNumber = -1  
        let myBestClassificationValue = 0.25   // lowest best allowable value 
-       if (this.globalDetection === Detection.ON) {    
-            for (var i = 0; i < height * width; i++) {
-                rgbData[i * 3] = imageData2.data[i] //R
-                rgbData[i * 3 + 1] = imageData2.data[i + 1] //G
-                rgbData[i * 3 + 2] = imageData2.data[i + 2] //B 
+       if (this.globalDetection === Detection.ON) { 
+        const dataArray = imageData2.dataSync();
+        for (let i = 0; i < scaledSquareDimension; i++) {
+            for (let j = 0; j < scaledSquareDimension; j++) {
+                const r = dataArray[(i * scaledSquareDimension + j) * channels];
+                const g = dataArray[(i * scaledSquareDimension + j) * channels + 1];
+                const b = dataArray[(i * scaledSquareDimension + j) * channels + 2];
+                
+                // console.log(`Pixel at (${i}, ${j}): R=${r}, G=${g}, B=${b}`);
+                const input = tf.tensor4d(dataArray, [1, scaledSquareDimension, scaledSquareDimension, channels]);
+                console.log('Input shape:', input.shape);
+                results = await model.predict(input);
+                const newModel = tf.sequential();
+                newModel.add(model);
+                newModel.add(tf.layers.flatten());
+                const numClasses = 2; // Adjust based on your number of classes
+                newModel.add(tf.layers.dense({units: numClasses, activation: 'softmax'}));
+                newModel.compile({
+                    optimizer: 'adam',
+                    loss: 'categoricalCrossentropy',
+                    metrics: ['accuracy']
+                });
+                let results = await newModel.predict(input);
+                const resultsArray = results.dataSync();
+                console.log('Class probabilities:', resultsArray);
+                
+                const bestClassIndex = resultsArray.indexOf(Math.max(...resultsArray));
+                const bestClassValue = resultsArray[bestClassIndex];
+                
+                console.log(`Best class: ${bestClassIndex}, Confidence: ${bestClassValue}`);
+                
+                // console.log(results);
             }
+        }   
+    //         for (var i = 0; i < height * width; i++) {
+    //             rgbData[i * 3] = imageData2.dataSync[i] //R
+    //             rgbData[i * 3 + 1] = imageData2.dataSync[i + 1] //G
+    //             rgbData[i * 3 + 2] = imageData2.dataSync[i + 2] //B 
+    //         }
+    //         console.log(rgbData);
         };
+
         // const input = tf.tensor4d(rgbData, [1, height, width, channels]);
         // results = await model.predict(input);
         // for (let j = 0;  j < results.results.length; j++){  
@@ -275,13 +309,12 @@ class Scratch3BballDetectBlocks {
                 dimensions: Scratch3BballDetectBlocks.DIMENSIONS
             });
             
-            const time = +new Date();
             if (frame) {
                 this.objectCenters = {"basketball": [], "hoop": []};
                 this.currImage = frame;
                 // this.poseStates = await this.estimatePoseOnImage(frame);
                 // this.poseState = this.poseStates[0];
-                console.log("currImage assigned");
+                // console.log("currImage assigned");
                 await this.loadAndPredict();
                 if (this.hasPose()) {
                     this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
@@ -289,8 +322,7 @@ class Scratch3BballDetectBlocks {
                     this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECTED);
                 }
             }
-            const estimateThrottleTimeout = (+new Date() - time) / 4;
-            await new Promise(r => setTimeout(r, estimateThrottleTimeout));
+            await new Promise(r => setTimeout(r, this.globalDetectionRate));
         }
     }
 
@@ -722,7 +754,7 @@ class Scratch3BballDetectBlocks {
                     arguments: {
                         RATE: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: 133
+                            defaultValue: 130
                         }
                     }
                 },

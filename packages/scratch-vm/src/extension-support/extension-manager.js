@@ -38,6 +38,7 @@ const builtinExtensions = {
     poseBody: () => require('../extensions/scratch3_pose_body'),
     gameballExt: () => require("../extensions/scratch3_gameball"),
     bballDetect: () => require("../extensions/scratch3_bballDetect"),
+    camera: () => require("../extensions/scratch3_camera")
 };
 
 /**

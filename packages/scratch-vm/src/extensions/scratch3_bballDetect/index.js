@@ -520,8 +520,6 @@ class Scratch3BballDetectBlocks {
             this.globalDetection = Detection.ON;
             this.projectStarted();
             this.firstInstall = false;
-            this._bodyModel = null;
-            this._taskModel = null;
         }
 
         // Return extension definition
@@ -599,36 +597,36 @@ class Scratch3BballDetectBlocks {
                     isTerminal: false
                 },
                 '---',
-                {
-                    opcode: 'setVideoTransparency',
-                    text: formatMessage({
-                        id: 'videoSensing.setVideoTransparency',
-                        default: 'Set video transparency to [TRANSPARENCY]%',
-                        description: 'Controls transparency of the video preview layer'
-                    }),
-                    arguments: {
-                        TRANSPARENCY: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 50
-                        }
-                    }
-                },
-                {
-                    opcode: 'videoToggle',
-                    text: formatMessage({
-                        id: 'videoSensing.videoToggle',
-                        default: 'Turn video [VIDEO_STATE]',
-                        description: 'Controls display of the video preview layer'
-                    }),
-                    arguments: {
-                        VIDEO_STATE: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'VIDEO_STATE',
-                            defaultValue: VideoState.OFF
-                        }
-                    }
-                },
-                '---',
+                // {
+                //     opcode: 'setVideoTransparency',
+                //     text: formatMessage({
+                //         id: 'videoSensing.setVideoTransparency',
+                //         default: 'Set video transparency to [TRANSPARENCY]%',
+                //         description: 'Controls transparency of the video preview layer'
+                //     }),
+                //     arguments: {
+                //         TRANSPARENCY: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 50
+                //         }
+                //     }
+                // },
+                // {
+                //     opcode: 'videoToggle',
+                //     text: formatMessage({
+                //         id: 'videoSensing.videoToggle',
+                //         default: 'Turn video [VIDEO_STATE]',
+                //         description: 'Controls display of the video preview layer'
+                //     }),
+                //     arguments: {
+                //         VIDEO_STATE: {
+                //             type: ArgumentType.NUMBER,
+                //             menu: 'VIDEO_STATE',
+                //             defaultValue: VideoState.OFF
+                //         }
+                //     }
+                // },
+                // '---',
                 {
                     opcode: 'whenObj',
                     text: 'When [OBJECT] detected',

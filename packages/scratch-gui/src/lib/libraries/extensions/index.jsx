@@ -239,6 +239,7 @@ export default [
             />
         ),
         featured: true,
+        launchPeripheralConnectionFlow: false,
         tags: ["Made by PRG"]
     },
     {
@@ -246,6 +247,7 @@ export default [
         extensionId: 'poseFace',
         iconURL: poseFaceBlocksIconURL,
         insetIconURL: poseFaceInsetIconURL,
+        launchPeripheralConnectionFlow: false,
         description: (
             <FormattedMessage
                 defaultMessage="Sense face movement with the camera."
@@ -269,6 +271,7 @@ export default [
             />
         ),
         featured: true,
+        launchPeripheralConnectionFlow: false,
         tags: ["tiilt Lab"]
     },
 
@@ -528,7 +531,6 @@ export default [
         disabled: false,
         bluetoothRequired: false,
         internetConnectionRequired: false,
-        launchPeripheralConnectionFlow: false,
         useAutoScan: false,
         helpLink: 'https://tiilt.northwestern.edu',
         tags: ["tiilt Lab"]

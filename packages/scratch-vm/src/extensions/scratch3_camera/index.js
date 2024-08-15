@@ -84,10 +84,10 @@ class Scratch3Camera {
          * @type {boolean}
          */
         this.firstInstall = true;
-        (async () => {
-            await this.getVideoSources();
-            videoDevices = this.videoDevices;
-        })();
+        // (async () => {
+        //     await this.getVideoSources();
+        //     videoDevices = this.videoDevices;
+        // })();
     }
 
     /**
@@ -372,7 +372,7 @@ class Scratch3Camera {
                         VIDEO_STATE: {
                             type: ArgumentType.NUMBER,
                             menu: 'VIDEO_STATE',
-                            defaultValue: VideoState.ON
+                            defaultValue: VideoState.OFF
                         }
                     }
                 },

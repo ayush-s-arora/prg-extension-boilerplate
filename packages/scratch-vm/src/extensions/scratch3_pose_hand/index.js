@@ -205,7 +205,16 @@ class Scratch3PoseNetBlocks {
     }
 
     isConnected() {
-        return !!this.handPoseState && this.handPoseState.length > 0;
+        const frame = this.runtime.ioDevices.video.getFrame({
+            format: Video.FORMAT_IMAGE_DATA,
+            dimensions: Scratch3PoseNetBlocks.DIMENSIONS
+        });
+        
+        if (frame) {
+            return !!this.handPoseState && this.handPoseState.length > 0;
+        } else {
+            return false;
+        }
     }
 
     scan() {
@@ -229,6 +238,8 @@ class Scratch3PoseNetBlocks {
                 } else {
                     this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECTED);
                 }
+            } else {
+                this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECTED);
             }
             const estimateThrottleTimeout = (+new Date() - time) / 4;
             await new Promise(r => setTimeout(r, estimateThrottleTimeout));
@@ -426,37 +437,37 @@ class Scratch3PoseNetBlocks {
                         },
                     },
                 },
-                '---',
-                {
-                    opcode: 'videoToggle',
-                    text: formatMessage({
-                        id: 'videoSensing.videoToggle',
-                        default: 'turn video [VIDEO_STATE]',
-                        description: 'Controls display of the video preview layer'
-                    }),
-                    arguments: {
-                        VIDEO_STATE: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'VIDEO_STATE',
-                            defaultValue: VideoState.OFF
-                        }
-                    }
-                },
-                {
-                    opcode: 'setVideoTransparency',
-                    text: formatMessage({
-                        id: 'videoSensing.setVideoTransparency',
-                        default: 'set video transparency to [TRANSPARENCY]',
-                        description: 'Controls transparency of the video preview layer'
-                    }),
-                    arguments: {
-                        TRANSPARENCY: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 50
-                        }
-                    }
-                },
-                '---',
+                // '---',
+                // {
+                //     opcode: 'videoToggle',
+                //     text: formatMessage({
+                //         id: 'videoSensing.videoToggle',
+                //         default: 'turn video [VIDEO_STATE]',
+                //         description: 'Controls display of the video preview layer'
+                //     }),
+                //     arguments: {
+                //         VIDEO_STATE: {
+                //             type: ArgumentType.NUMBER,
+                //             menu: 'VIDEO_STATE',
+                //             defaultValue: VideoState.OFF
+                //         }
+                //     }
+                // },
+                // {
+                //     opcode: 'setVideoTransparency',
+                //     text: formatMessage({
+                //         id: 'videoSensing.setVideoTransparency',
+                //         default: 'set video transparency to [TRANSPARENCY]',
+                //         description: 'Controls transparency of the video preview layer'
+                //     }),
+                //     arguments: {
+                //         TRANSPARENCY: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 50
+                //         }
+                //     }
+                // },
+                // '---',
             ],
             menus: {
                 HAND_PART: {

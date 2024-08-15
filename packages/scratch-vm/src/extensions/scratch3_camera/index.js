@@ -63,7 +63,7 @@ const VideoState = {
 
 const EXTENSION_ID = 'camera';
 
-let videoDevices = [];
+// let videoDevices = [];
 
 /**
  * Class for the motion-related blocks in Scratch 3.0
@@ -167,14 +167,14 @@ class Scratch3Camera {
         return state;
     }
 
-    async getVideoSources() {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        this.videoDevices = devices.filter(device => device.kind === 'videoinput')
-        .map(device => ({
-            name: device.label || `Camera ${device.deviceId}`,
-            value: device.deviceId
-        }));
-    }
+    // async getVideoSources() {
+    //     const devices = await navigator.mediaDevices.enumerateDevices();
+    //     this.videoDevices = devices.filter(device => device.kind === 'videoinput')
+    //     .map(device => ({
+    //         name: device.label || `Camera ${device.deviceId}`,
+    //         value: device.deviceId
+    //     }));
+    // }
 
     /**
      * Get the latest values for video transparency and state,
@@ -322,17 +322,17 @@ class Scratch3Camera {
         ];
     }
 
-    get VIDEO_SOURCE_INFO () {
-        console.log(videoDevices);
-        return videoDevices.map((device, index) => ({
-            name: formatMessage({
-                id: device.value,
-                default: device.name,
-                description: `A connected camera called ${device.name}`
-            }),
-            value: index
-        }));
-    }
+    // get VIDEO_SOURCE_INFO () {
+    //     console.log(videoDevices);
+    //     return videoDevices.map((device, index) => ({
+    //         name: formatMessage({
+    //             id: device.value,
+    //             default: device.name,
+    //             description: `A connected camera called ${device.name}`
+    //         }),
+    //         value: index
+    //     }));
+    // }
 
     /**
      * @returns {object} metadata for this extension and its blocks.
@@ -390,31 +390,31 @@ class Scratch3Camera {
                         }
                     }
                 },
-                {
-                    opcode: 'setVideoSource',
-                    text: formatMessage({
-                        id: 'videoSensing.setVideoSource',
-                        default: 'Set video source to [VIDEO_SOURCE]',
-                        description: 'Controls video source of the video preview layer'
-                    }),
-                    arguments: {
-                        VIDEO_SOURCE: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'VIDEO_SOURCE',
-                            defaultValue: 45 //temporary
-                        }
-                    }
-                }
+                // {
+                //     opcode: 'setVideoSource',
+                //     text: formatMessage({
+                //         id: 'videoSensing.setVideoSource',
+                //         default: 'Set video source to [VIDEO_SOURCE]',
+                //         description: 'Controls video source of the video preview layer'
+                //     }),
+                //     arguments: {
+                //         VIDEO_SOURCE: {
+                //             type: ArgumentType.NUMBER,
+                //             menu: 'VIDEO_SOURCE',
+                //             defaultValue: 45 //temporary
+                //         }
+                //     }
+                // }
             ],
             menus: {
                 VIDEO_STATE: {
                     acceptReporters: true,
                     items: this._buildMenu(this.VIDEO_STATE_INFO)
                 },
-                VIDEO_SOURCE: {
-                    acceptReporters: true,
-                    items: this._buildMenu(this.VIDEO_SOURCE_INFO)
-                }
+                // VIDEO_SOURCE: {
+                //     acceptReporters: true,
+                //     items: this._buildMenu(this.VIDEO_SOURCE_INFO)
+                // }
             }
         };
     }

@@ -1,3 +1,9 @@
+**Important - tiilt Lab**:
+
+In its current state, this repository does **not** support loading extensions from [/extensions/src/](extensions/src). Since we have no extensions in that directory to bundle with our ```npm run build```, I had to alter how extensions load to ensure compilation, effectively disabling reading from the directory. All of our extensions load from [the VM directory](packages/scratch-vm/src/extensions) and are defined [here](packages/scratch-vm/src/extension-support/extension-manager.js). 
+
+If you would like to add extensions to [/extensions/src/](extensions/src), please feel free to do so, and then uncomment lines 2 and 77 in [index.jsx](packages/scratch-gui/src/lib/libraries/extensions/index.jsx). That *should* restore functionality.
+
 # ✨ PRG Scratch Extension Development Environment
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/mitmedialab/prg-extension-boilerplate/tree/dev)

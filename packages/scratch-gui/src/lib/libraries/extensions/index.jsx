@@ -1,11 +1,14 @@
 /* DO NOT REMOVE */
-import generatedDetails from '../../../generated/details.generated';
+// import generatedDetails from '../../../generated/details.generated';
+//MUST uncomment if building extensions in  /extensions/src/
 /* DO NOT REMOVE */
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import poseBodyBlocksIconURL from './posenet/pose-body.png';
+import poseHandBlocksIconURL from './posenet/pose-hand.png';
+import poseFaceBlocksIconURL from './posenet/pose-face.png';
 
 // import arduinoRobotIconURL from './arduino_extension/arduino_extension.png';
 // import arduinoRobotInsetIconURL from './arduino_extension/arduino_small.svg';
@@ -24,6 +27,8 @@ import penInsetIconURL from './pen/pen-small.svg';
 import videoSensingIconURL from './videoSensing/video-sensing.png';
 import videoSensingInsetIconURL from './videoSensing/video-sensing-small.svg';
 
+import poseHandInsetIconURL from './posenet/pose-hand-small-3.svg';
+import poseFaceInsetIconURL from './posenet/pose-face-small.svg';
 import poseBodyInsetIconURL from './posenet/pose-body-small.svg';
 
 import text2speechIconURL from './text2speech/text2speech.png';
@@ -38,10 +43,10 @@ import gameballInsetIconURL from './gameball/gb.svg';
 // import makeymakeyIconURL from './makeymakey/makeymakey.png';
 // import makeymakeyInsetIconURL from './makeymakey/makeymakey-small.svg';
 
-import microbitIconURL from './microbit/microbit.png';
+// import microbitIconURL from './microbit/microbit.png';
 import microbitInsetIconURL from './microbit/microbit-small.svg';
-import microbitConnectionIconURL from './microbit/microbit-illustration.svg';
-import microbitConnectionSmallIconURL from './microbit/microbit-small.svg';
+// import microbitConnectionIconURL from './microbit/microbit-illustration.svg';
+// import microbitConnectionSmallIconURL from './microbit/microbit-small.svg';
 
 // import ev3IconURL from './ev3/ev3.png';
 // import ev3InsetIconURL from './ev3/ev3-small.svg';
@@ -60,16 +65,17 @@ import microbitConnectionSmallIconURL from './microbit/microbit-small.svg';
 // import boostConnectionSmallIconURL from './boost/boost-small.svg';
 // import boostConnectionTipIconURL from './boost/boost-button-illustration.svg';
 
-import gdxforIconURL from './gdxfor/gdxfor.png';
-import gdxforInsetIconURL from './gdxfor/gdxfor-small.svg';
-import gdxforConnectionIconURL from './gdxfor/gdxfor-illustration.svg';
-import gdxforConnectionSmallIconURL from './gdxfor/gdxfor-small.svg';
+// import gdxforIconURL from './gdxfor/gdxfor.png';
+// import gdxforInsetIconURL from './gdxfor/gdxfor-small.svg';
+// import gdxforConnectionIconURL from './gdxfor/gdxfor-illustration.svg';
+// import gdxforConnectionSmallIconURL from './gdxfor/gdxfor-small.svg';
 
 import tiiltIconURL from './bballDetect/logo.png';
 
 export default [
     /* DO NOT REMOVE */
-    ...generatedDetails,
+    // ...generatedDetails,
+    //MUST uncomment if building extensions in  /extensions/src/
     /* DO NOT REMOVE */
     {
         name: (
@@ -220,6 +226,36 @@ export default [
         tags: ["Made by Scratch"]
     },
 
+    {
+        name: "Hand Sensing",
+        extensionId: 'poseHand',
+        iconURL: poseHandBlocksIconURL,
+        insetIconURL: poseHandInsetIconURL,
+        description: (
+            <FormattedMessage
+                defaultMessage="Sense hand movement with the camera."
+                description="PoseNet Description"
+                id="gui.extension.pose_hand.description"
+            />
+        ),
+        featured: true,
+        tags: ["Made by PRG"]
+    },
+    {
+        name: "Face Sensing",
+        extensionId: 'poseFace',
+        iconURL: poseFaceBlocksIconURL,
+        insetIconURL: poseFaceInsetIconURL,
+        description: (
+            <FormattedMessage
+                defaultMessage="Sense face movement with the camera."
+                description="PoseNet Description"
+                id="gui.extension.pose_face.description"
+            />
+        ),
+        featured: true,
+        tags: ["Made by PRG"]
+    },
     {
         name: "Body Sensing",
         extensionId: 'poseBody',
@@ -473,8 +509,6 @@ export default [
         internetConnectionRequired: false,
         launchPeripheralConnectionFlow: false,
         useAutoScan: false,
-        connectionIconURL: gdxforConnectionIconURL,
-        connectionSmallIconURL: gdxforConnectionSmallIconURL,
         helpLink: 'https://tiilt.northwestern.edu',
         tags: ["tiilt Lab"]
     },
@@ -496,8 +530,6 @@ export default [
         internetConnectionRequired: false,
         launchPeripheralConnectionFlow: false,
         useAutoScan: false,
-        connectionIconURL: gdxforConnectionIconURL,
-        connectionSmallIconURL: gdxforConnectionSmallIconURL,
         helpLink: 'https://tiilt.northwestern.edu',
         tags: ["tiilt Lab"]
     },

@@ -75,14 +75,18 @@ const Detection = {
     ON: 'on',
 };
 const Objects = {
-    ALL: 'objects',
+    // ALL: 'objects',
     BASKETBALL: 'basketballs',
-    RIM: "rims"
+    RIM: 'rims'
 };
 const Object = {
-    ALL: 'object',
+    // ANY: 'object',
     BASKETBALL: 'basketball',
-    RIM: "rim"
+    RIM: 'rim'
+}
+const Axis = {
+    X: 'X',
+    Y: 'Y'
 }
 
 const EXTENSION_ID = 'bballDetect';
@@ -449,14 +453,14 @@ class Scratch3BballDetectBlocks {
 
     get OBJECTS_INFO () {
         return [
-            {
-                name: formatMessage({
-                    id: 'objects.all',
-                    default: 'objects',
-                    description: 'Bounding boxes for ALL objects'
-                }),
-                value: Objects.ALL
-            },
+            // {
+            //     name: formatMessage({
+            //         id: 'objects.all',
+            //         default: 'objects',
+            //         description: 'Bounding boxes for ALL objects'
+            //     }),
+            //     value: Objects.ALL
+            // },
             {
                 name: formatMessage({
                     id: 'objects.basketball',
@@ -478,14 +482,14 @@ class Scratch3BballDetectBlocks {
     
     get OBJECT_INFO () {
         return [
-            {
-                name: formatMessage({
-                    id: 'object.any',
-                    default: 'object',
-                    description: 'Singular object'
-                }),
-                value: Object.ANY
-            },
+            // {
+            //     name: formatMessage({
+            //         id: 'object.any',
+            //         default: 'object',
+            //         description: 'Singular object'
+            //     }),
+            //     value: Object.ANY
+            // },
             {
                 name: formatMessage({
                     id: 'object.basketball',
@@ -501,6 +505,27 @@ class Scratch3BballDetectBlocks {
                     description: 'Singular rim'
                 }),
                 value: Object.RIM
+            }
+        ]
+    }
+
+    get AXIS_INFO () {
+        return [
+            {
+                name: formatMessage({
+                    id: 'axis.x',
+                    default: 'X',
+                    description: 'X-axis'
+                }),
+                value: Axis.X
+            },
+            {
+                name: formatMessage({
+                    id: 'axis.Y',
+                    default: 'Y',
+                    description: 'Y-axis'
+                }),
+                value: Axis.Y
             }
         ]
     }
@@ -527,8 +552,8 @@ class Scratch3BballDetectBlocks {
             id: EXTENSION_ID,
             name: formatMessage({
                 id: 'bballDetect.categoryName',
-                default: 'Basketball/Rim Detection',
-                description: 'Label for tiilt Basketball/Rim Detection'
+                default: 'Sport Finder',
+                description: 'tiilt Sport Finder'
             }),
             showStatusButton: true,
             blockIconURI: blockIconURI,
@@ -559,7 +584,7 @@ class Scratch3BballDetectBlocks {
                         OBJECT : {
                             type: ArgumentType.NUMBER,
                             menu: 'OBJECT',
-                            defaultValue: Object.ANY,
+                            defaultValue: Object.BASKETBALL,
                         }
                     },
                 },
@@ -636,7 +661,7 @@ class Scratch3BballDetectBlocks {
                         OBJECT: {
                             type: ArgumentType.NUMBER,
                             menu: 'OBJECT',
-                            defaultValue: Object.ANY,
+                            defaultValue: Object.BASKETBALL,
                         },
                     }
                 },
@@ -650,7 +675,7 @@ class Scratch3BballDetectBlocks {
                         OBJECTS: {
                             type: ArgumentType.NUMBER,
                             menu: 'OBJECTS',
-                            defaultValue: Objects.ALL,
+                            defaultValue: Objects.BASKETBALL,
                         },
                     }
                 },
@@ -663,49 +688,67 @@ class Scratch3BballDetectBlocks {
                         OBJECTS : {
                             type: ArgumentType.NUMBER,
                             menu: 'OBJECTS',
-                            defaultValue: Objects.ALL,
+                            defaultValue: Objects.BASKETBALL,
                         }
                     }
                 },
+                // {
+                //     opcode: 'objectsCoords',
+                //     text: '(x, y) coordinates of [OBJECTS]',
+                //     blockType: BlockType.REPORTER,
+                //     isTerminal: true,
+                //     arguments: {
+                //         OBJECTS: {
+                //             type: ArgumentType.NUMBER,
+                //             menu: 'OBJECTS',
+                //             defaultValue: Objects.ALL,
+                //         },
+                //     }
+                // },
                 {
-                    opcode: 'objectsCoords',
-                    text: '(x, y) coordinates of [OBJECTS]',
+                    opcode: 'objectsPos',
+                    text: '[AXIS] positions of [OBJECTS]',
                     blockType: BlockType.REPORTER,
                     isTerminal: true,
                     arguments: {
+                        AXIS: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'AXIS',
+                            defaultValue: Axis.X,
+                        },
                         OBJECTS: {
                             type: ArgumentType.NUMBER,
                             menu: 'OBJECTS',
-                            defaultValue: Objects.ALL,
+                            defaultValue: Objects.BASKETBALL,
                         },
                     }
                 },
-                {
-                    opcode: 'objectsXCoords',
-                    text: 'X coordinates of [OBJECTS]',
-                    blockType: BlockType.REPORTER,
-                    isTerminal: true,
-                    arguments: {
-                        OBJECTS: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'OBJECTS',
-                            defaultValue: Objects.ALL,
-                        },
-                    }
-                },
-                {
-                    opcode: 'objectsYCoords',
-                    text: 'Y coordinates of [OBJECTS]',
-                    blockType: BlockType.REPORTER,
-                    isTerminal: true,
-                    arguments: {
-                        OBJECTS: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'OBJECTS',
-                            defaultValue: Objects.ALL,
-                        },
-                    }
-                },
+                // {
+                //     opcode: 'objectsXCoords',
+                //     text: 'X positions of [OBJECTS]',
+                //     blockType: BlockType.REPORTER,
+                //     isTerminal: true,
+                //     arguments: {
+                //         OBJECTS: {
+                //             type: ArgumentType.NUMBER,
+                //             menu: 'OBJECTS',
+                //             defaultValue: Objects.BASKETBALL,
+                //         },
+                //     }
+                // },
+                // {
+                //     opcode: 'objectsYCoords',
+                //     text: 'Y positions of [OBJECTS]',
+                //     blockType: BlockType.REPORTER,
+                //     isTerminal: true,
+                //     arguments: {
+                //         OBJECTS: {
+                //             type: ArgumentType.NUMBER,
+                //             menu: 'OBJECTS',
+                //             defaultValue: Objects.BASKETBALL,
+                //         },
+                //     }
+                // },
                 {
                     opcode: 'nearestCoords',
                     text: '(x, y) coordinates of nearest [OBJECT]',
@@ -715,7 +758,25 @@ class Scratch3BballDetectBlocks {
                         OBJECT: {
                             type: ArgumentType.NUMBER,
                             menu: 'OBJECT',
-                            defaultValue: Object.ANY,
+                            defaultValue: Object.BASKETBALL,
+                        },
+                    }
+                },
+                {
+                    opcode: 'nearestPos',
+                    text: '[AXIS] position of nearest [OBJECT]',
+                    blockType: BlockType.REPORTER,
+                    isTerminal: true,
+                    arguments: {
+                        AXIS: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'AXIS',
+                            defaultValue: Axis.X,
+                        },
+                        OBJECT: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'OBJECT',
+                            defaultValue: Object.BASKETBALL,
                         },
                     }
                 },
@@ -780,6 +841,10 @@ class Scratch3BballDetectBlocks {
                 OBJECT: {
                     acceptReporters: true,
                     items: this._buildMenu(this.OBJECT_INFO)
+                },
+                AXIS: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.AXIS_INFO)
                 }
             }
         };
@@ -880,51 +945,72 @@ class Scratch3BballDetectBlocks {
         }
     }
 
-    objectsCoords(args, util) {
-        let objects = [];
-        let coordsString = "";
-        if (args['OBJECTS'] === Objects.BASKETBALL) {
-            objects = this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECTS'] === Objects.RIM) {
-            objects = this.detections.filter(detection => detection.class === "Rim");
-        } else {
-            objects = this.detections;
-        }
-        if (objects.length != 0) {
-            for (const object of objects) {
-                const coord = `(${this.tfPositiontoScratch(object.position).x}, ${this.tfPositiontoScratch(object.position).y})`;
+    // objectsCoords(args, util) {
+    //     let objects = [];
+    //     let coordsString = "";
+    //     if (args['OBJECTS'] === Objects.BASKETBALL) {
+    //         objects = this.detections.filter(detection => detection.class === "Basketball");
+    //     } else if (args['OBJECTS'] === Objects.RIM) {
+    //         objects = this.detections.filter(detection => detection.class === "Rim");
+    //     } else {
+    //         objects = this.detections;
+    //     }
+    //     if (objects.length != 0) {
+    //         for (const object of objects) {
+    //             const coord = `(${this.tfPositiontoScratch(object.position).x}, ${this.tfPositiontoScratch(object.position).y})`;
                 
-                coordsString += coord;
-                coordsString += "\n";
-            }
-            return coordsString;
-        }
-    }
+    //             coordsString += coord;
+    //             coordsString += "\n";
+    //         }
+    //         return coordsString;
+    //     }
+    // }
 
-    objectsXCoords(args, util) {
-        let objects = [];
-        let xPosString = "";
-        if (args['OBJECTS'] === Objects.BASKETBALL) {
-            objects = this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECTS'] === Objects.RIM) {
-            objects = this.detections.filter(detection => detection.class === "Rim");
-        } else {
-            objects = this.detections;
-        }
-        if (objects.length != 0) {
-            for (const object of objects) {
-                const x = this.tfPositiontoScratch(object.position).x;
+    // objectsXCoords(args, util) {
+    //     let objects = [];
+    //     let xPosString = "";
+    //     if (args['OBJECTS'] === Objects.BASKETBALL) {
+    //         objects = this.detections.filter(detection => detection.class === "Basketball");
+    //     } else if (args['OBJECTS'] === Objects.RIM) {
+    //         objects = this.detections.filter(detection => detection.class === "Rim");
+    //     } else {
+    //         objects = this.detections;
+    //     }
+    //     if (objects.length != 0) {
+    //         for (const object of objects) {
+    //             const x = this.tfPositiontoScratch(object.position).x;
                 
-                xPosString += x;
-                xPosString += "\n";
-            }
-            return xPosString;
-        }
-    }
+    //             xPosString += x;
+    //             xPosString += "\n";
+    //         }
+    //         return xPosString;
+    //     }
+    // }
 
-    objectsYCoords(args, util) {
+    // objectsYCoords(args, util) {
+    //     let objects = [];
+    //     let yPosString = "";
+    //     if (args['OBJECTS'] === Objects.BASKETBALL) {
+    //         objects = this.detections.filter(detection => detection.class === "Basketball");
+    //     } else if (args['OBJECTS'] === Objects.RIM) {
+    //         objects = this.detections.filter(detection => detection.class === "Rim");
+    //     } else {
+    //         objects = this.detections;
+    //     }
+    //     if (objects.length != 0) {
+    //         for (const object of objects) {
+    //             const y = this.tfPositiontoScratch(object.position).y;
+                
+    //             yPosString += y;
+    //             yPosString += "\n";
+    //         }
+    //         return yPosString;
+    //     }
+    // }
+
+    objectsPos(args, util) {
         let objects = [];
-        let yPosString = "";
+        let posString = "";
         if (args['OBJECTS'] === Objects.BASKETBALL) {
             objects = this.detections.filter(detection => detection.class === "Basketball");
         } else if (args['OBJECTS'] === Objects.RIM) {
@@ -932,14 +1018,26 @@ class Scratch3BballDetectBlocks {
         } else {
             objects = this.detections;
         }
-        if (objects.length != 0) {
-            for (const object of objects) {
-                const y = this.tfPositiontoScratch(object.position).y;
-                
-                yPosString += y;
-                yPosString += "\n";
+        if (args['AXIS'] === Axis.X) {
+            if (objects.length != 0) {
+                for (const object of objects) {
+                    const x = this.tfPositiontoScratch(object.position).x;
+                    
+                    posString += x;
+                    posString += "\n";
+                }
+                return posString;
             }
-            return yPosString;
+        } else {
+            if (objects.length != 0) {
+                for (const object of objects) {
+                    const y = this.tfPositiontoScratch(object.position).y;
+                    
+                    posString += y;
+                    posString += "\n";
+                }
+                return posString;
+            }
         }
     }
 
@@ -971,6 +1069,41 @@ class Scratch3BballDetectBlocks {
                 }
             }
             return `(${nearestDetection.x}, ${nearestDetection.y})`;
+        }
+    }
+
+    nearestPos(args, util) {
+        let nearestDetection = null;
+        let nearestDistance = Infinity;
+        let objects = [];
+        if (args['OBJECT'] === Object.BASKETBALL) {
+            objects = this.detections.filter(detection => detection.class === "Basketball");
+        } else if (args['OBJECT'] === Object.RIM) {
+            objects = this.detections.filter(detection => detection.class === "Rim");
+        } else {
+            objects = this.detections;
+        }
+        if (objects.length != 0) {
+            for (const object of objects) {
+                const x = this.tfPositiontoScratch(object.position).x;
+                const y = this.tfPositiontoScratch(object.position).y;
+
+                // Calculate the distance from the current sprite position to the detection
+                const spriteX = util.target.x; // Current sprite x position
+                const spriteY = util.target.y; // Current sprite y position
+                const distance = Math.sqrt(Math.pow(x - spriteX, 2) + Math.pow(y - spriteY, 2));
+
+                // Update nearestDetection if this one is closer
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestDetection = { x, y }; // Store the coordinates of the nearest detection
+                }
+            }
+            if (args['AXIS'] === Axis.X) {
+                return nearestDetection.x;
+            } else {
+                return nearestDetection.y;
+            }
         }
     }
 

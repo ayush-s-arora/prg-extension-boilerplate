@@ -1,8 +1,10 @@
 **Important - tiilt Lab**:
 
-In its current state, this repository does **not** support loading extensions from [/extensions/src/](extensions/src). Since we have no extensions in that directory to bundle with our ```npm run build```, I had to alter how extensions load to ensure compilation, effectively disabling reading from the directory. All of our extensions load from [the VM directory](packages/scratch-vm/src/extensions) and are defined [here](packages/scratch-vm/src/extension-support/extension-manager.js). 
+In its current state, this repository does **not** support loading extensions from [/extensions/src/](extensions/src). Since we have no extensions in that directory that we would like to load upon running ```npm run build```, I had to effectively disable loading from the directory. All of our extensions load from [the VM directory](packages/scratch-vm/src/extensions) and are defined [here](packages/scratch-vm/src/extension-support/extension-manager.js).
 
-If you would like to add extensions to [/extensions/src/](extensions/src), please feel free to do so, and then uncomment lines 2 and 77 in [index.jsx](packages/scratch-gui/src/lib/libraries/extensions/index.jsx). That *should* restore functionality.
+There needs to be at least one extension folder in [/extensions/src/](extensions/src) for ``npm run build`` to execute. In our case, it's [objectDetection](extensions/src/objectDetection). However, [objectDetection](extensions/src/objectDetection) does not load into the GUI.
+
+If you would like to load extensions from [/extensions/src/](extensions/src) into the GUI, please uncomment lines 2 and 77 in [index.jsx](packages/scratch-gui/src/lib/libraries/extensions/index.jsx). That *should* restore functionality.
 
 # ✨ PRG Scratch Extension Development Environment
 

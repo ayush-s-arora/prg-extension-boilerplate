@@ -1,5 +1,7 @@
 const StageLayering = require('../engine/stage-layering');
 
+let videoDevices = [];
+
 class Video {
     constructor (runtime) {
         this.runtime = runtime;
@@ -39,6 +41,11 @@ class Video {
          * @type {number}
          */
         this._forceTransparentPreview = false;
+        
+        async () => {
+            await this.getVideoSources();
+            videoDevices = this.videoDevices;
+        };
     }
 
     static get FORMAT_IMAGE_DATA () {
@@ -95,6 +102,19 @@ class Video {
         this._disablePreview();
         if (!this.provider) return null;
         this.provider.disableVideo();
+    }
+
+    setVideoSource (deviceId) {
+        this.provider.setVideoSource(deviceId);
+    }
+
+    async getVideoSources() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        return devices.filter(device => device.kind === 'videoinput')
+        .map(device => ({
+            name: device.label || `Camera ${device.deviceId}`,
+            value: device.deviceId
+        }));
     }
 
     /**

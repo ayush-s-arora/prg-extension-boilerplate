@@ -1018,26 +1018,15 @@ class Scratch3BballDetectBlocks {
         } else {
             objects = this.detections;
         }
-        if (args['AXIS'] === Axis.X) {
-            if (objects.length != 0) {
-                for (const object of objects) {
-                    const x = this.tfPositiontoScratch(object.position).x;
-                    
-                    posString += x;
-                    posString += "\n";
-                }
-                return posString;
+        if (objects.length != 0) {
+            const xORy = args['AXIS'] === Axis.X ? 'x' : 'y'; //set to X if user argument is X, else set to y
+            for (const object of objects) {
+                const pos = this.tfPositiontoScratch(object.position)[xORy]; //access all X or Y positions
+                
+                posString += pos;
+                posString += "\n";
             }
-        } else {
-            if (objects.length != 0) {
-                for (const object of objects) {
-                    const y = this.tfPositiontoScratch(object.position).y;
-                    
-                    posString += y;
-                    posString += "\n";
-                }
-                return posString;
-            }
+            return posString;
         }
     }
 
@@ -1221,10 +1210,6 @@ class Scratch3BballDetectBlocks {
             }
             // If nearest detections were found, return the angle between them
             if (nearestObject1Detection && nearestObject2Detection) {
-                console.log(nearestObject2Detection.y);
-                console.log(nearestObject1Detection.y);
-                console.log(nearestObject2Detection.x);
-                console.log(nearestObject1Detection.x);
                 const angle = Math.abs((Math.atan2((nearestObject2Detection.y - nearestObject1Detection.y), (nearestObject2Detection.x - nearestObject1Detection.x))) * (180 / Math.PI));
                 if (angle > 180) {
                     angle -= 180;

@@ -65,6 +65,11 @@ declare class Video {
      * @return {void}
      */
     disableVideo(): void;
+    setVideoSource(deviceId: any): void;
+    getVideoSources(): Promise<{
+        name: string;
+        value: string;
+    }[]>;
     /**
      * Return frame data from the video feed in a specified dimensions, format, and mirroring.
      *

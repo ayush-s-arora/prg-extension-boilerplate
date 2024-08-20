@@ -68,6 +68,15 @@ class VideoProvider {
         return this._video;
     }
 
+    async getVideoSources() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        return devices.filter(device => device.kind === 'videoinput')
+        .map(device => ({
+            name: device.label || `Camera ${device.deviceId}`,
+            value: device.deviceId
+        }));
+    }
+
     /**
      * Request video be enabled.  Sets up video, creates video skin and enables preview.
      *
@@ -89,6 +98,21 @@ class VideoProvider {
                 .then(this._teardown.bind(this))
                 .catch(err => this.onError(err));
         }
+    }
+    
+    setVideoSource (deviceId) {
+        this.deviceId = deviceId;
+        //to account for if user already has their video on
+        let currState = this.enabled;
+        this.enabled = false;
+        this.disableVideo();
+        this._setupVideo();
+        if (currState) {
+            setTimeout(() => { //the following lines require a timeout, otherwise they don't function as intended (camera doesn't switch)
+                this.enabled = true;
+                this.enableVideo();
+            });
+        }        
     }
 
     /**
@@ -198,17 +222,25 @@ class VideoProvider {
      * @private
      * @return {Promise} When video has been received, rejected if video is not received
      */
-    _setupVideo () {
+    async _setupVideo () {
         // We cache the result of this setup so that we can only ever have a single
         // video/getUserMedia request happen at a time.
         if (this._singleSetup) {
             return this._singleSetup;
         }
 
-        this._singleSetup = requestVideoStream({
+        const videoDesc = {
             width: {min: 480, ideal: 640},
             height: {min: 360, ideal: 480}
-        })
+        }
+
+        if (this.deviceId) {
+            Object.assign(videoDesc, {deviceId: {exact: this.deviceId.value}}); //assign the select camera's device properties (just the ID, not the camera name) to videoDesc
+        }
+
+        console.log(videoDesc);
+
+        this._singleSetup = requestVideoStream(videoDesc)
             .then(stream => {
                 this._video = document.createElement('video');
 

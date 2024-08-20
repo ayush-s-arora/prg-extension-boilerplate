@@ -113,10 +113,15 @@ class Blocks extends React.Component {
             this.props.vm.runtime.emit('CONNECT_MICROBIT_ROBOT');
         }
 
+        const connectCamerasCallback = () => {
+            this.props.vm.runtime.emit('CONNECT_CAMERAS');
+        }
+
         toolboxWorkspace.registerButtonCallback('MAKE_A_VARIABLE', varListButtonCallback(''));
         toolboxWorkspace.registerButtonCallback('MAKE_A_LIST', varListButtonCallback('list'));
         toolboxWorkspace.registerButtonCallback('MAKE_A_PROCEDURE', procButtonCallback);
         toolboxWorkspace.registerButtonCallback('CONNECT_MICROBIT_ROBOT', connectMicrobitRobotCallback);
+        toolboxWorkspace.registerButtonCallback('CONNECT_CAMERAS', connectCamerasCallback);
 
         this.props.vm.runtime.on(openUIEvent, (details) => this.props.onOpenProgrammaticModal(details));
 
@@ -483,7 +488,7 @@ class Blocks extends React.Component {
         this.setState(p);
     }
     handleConnectionModalStart(extensionId) {
-        let prgCustomExtensions = ['microbitRobot', 'teachableMachine', 'gameballExt', 'bballDetect', 'poseFace', 'poseBody', 'poseHand'];
+        let prgCustomExtensions = ['microbitRobot', 'teachableMachine', 'gameballExt', 'bballDetect', 'poseFace', 'poseBody', 'poseHand', 'camera'];
         if (!prgCustomExtensions.includes(extensionId)) {
             this.props.onOpenConnectionModal(extensionId);
         }

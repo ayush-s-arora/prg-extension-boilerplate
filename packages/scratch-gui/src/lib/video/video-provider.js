@@ -238,8 +238,6 @@ class VideoProvider {
             Object.assign(videoDesc, {deviceId: {exact: this.deviceId.value}}); //assign the select camera's device properties (just the ID, not the camera name) to videoDesc
         }
 
-        console.log(videoDesc);
-
         this._singleSetup = requestVideoStream(videoDesc)
             .then(stream => {
                 this._video = document.createElement('video');

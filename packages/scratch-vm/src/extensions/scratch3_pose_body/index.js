@@ -510,20 +510,6 @@ class Scratch3PoseNetBlocks {
 
                 /// TODO::: set up confidence threshold setter!!!
                 // {
-                //     opcode: 'goToObjects',
-                //     text: 'go to [OBJECT]',
-                //     blockType: BlockType.COMMAND,
-                //     isTerminal: false,
-                //     arguments: {
-                //         OBJECT: {
-                //             type: ArgumentType.STRING,
-                //             defaultValue: 'basketball',
-                //             menu: 'OBJECT'
-                //         },
-                //     },
-                // },
-                // '---',
-                // {
                 //     opcode: 'videoToggle',
                 //     text: formatMessage({
                 //         id: 'videoSensing.videoToggle',
@@ -725,9 +711,6 @@ class Scratch3PoseNetBlocks {
         if (this.hasPose()){
             return this.tfCoordsToScratch({x: this.poseState.keypoints.find(point => point.name === args['PART']).x}).x;
         }
-        else {
-            return 0
-        }
     }
 
     /**
@@ -738,9 +721,6 @@ class Scratch3PoseNetBlocks {
     posePositionY(args, util) {
         if (this.hasPose()){
             return this.tfCoordsToScratch({y: this.poseState.keypoints.find(point => point.name === args['PART']).y}).y;
-        }
-        else {
-            return 0;
         }
     }
 
@@ -785,9 +765,6 @@ class Scratch3PoseNetBlocks {
                 return ang123;
             }
             // return this.tfCoordsToScratch({y: this.poseState.keypoints.find(point => point.name === args['PART']).y}).y;
-        }
-        else {
-            return 0;
         }
     }
 

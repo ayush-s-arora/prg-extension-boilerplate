@@ -464,35 +464,35 @@ class Scratch3VideoSensingBlocks {
                         }
                     }
                 },
-                {
-                    opcode: 'videoToggle',
-                    text: formatMessage({
-                        id: 'videoSensing.videoToggle',
-                        default: 'turn video [VIDEO_STATE]',
-                        description: 'Controls display of the video preview layer'
-                    }),
-                    arguments: {
-                        VIDEO_STATE: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'VIDEO_STATE',
-                            defaultValue: VideoState.ON
-                        }
-                    }
-                },
-                {
-                    opcode: 'setVideoTransparency',
-                    text: formatMessage({
-                        id: 'videoSensing.setVideoTransparency',
-                        default: 'set video transparency to [TRANSPARENCY]',
-                        description: 'Controls transparency of the video preview layer'
-                    }),
-                    arguments: {
-                        TRANSPARENCY: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 50
-                        }
-                    }
-                }
+                // {
+                //     opcode: 'videoToggle',
+                //     text: formatMessage({
+                //         id: 'videoSensing.videoToggle',
+                //         default: 'turn video [VIDEO_STATE]',
+                //         description: 'Controls display of the video preview layer'
+                //     }),
+                //     arguments: {
+                //         VIDEO_STATE: {
+                //             type: ArgumentType.NUMBER,
+                //             menu: 'VIDEO_STATE',
+                //             defaultValue: VideoState.ON
+                //         }
+                //     }
+                // },
+                // {
+                //     opcode: 'setVideoTransparency',
+                //     text: formatMessage({
+                //         id: 'videoSensing.setVideoTransparency',
+                //         default: 'set video transparency to [TRANSPARENCY]',
+                //         description: 'Controls transparency of the video preview layer'
+                //     }),
+                //     arguments: {
+                //         TRANSPARENCY: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 50
+                //         }
+                //     }
+                // }
             ],
             menus: {
                 ATTRIBUTE: {

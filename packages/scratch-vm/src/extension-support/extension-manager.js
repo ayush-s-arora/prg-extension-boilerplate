@@ -36,6 +36,7 @@ const builtinExtensions = {
     poseFace: () => require('../extensions/scratch3_pose_face'),
     poseHand: () => require('../extensions/scratch3_pose_hand'),
     poseBody: () => require('../extensions/scratch3_pose_body'),
+    poseBodyMulti: () => require('../extensions/scratch3_pose_bodyMulti'),
     gameballExt: () => require("../extensions/scratch3_gameball"),
     bballDetect: () => require("../extensions/scratch3_bballDetect"),
     camera: () => require("../extensions/scratch3_camera")

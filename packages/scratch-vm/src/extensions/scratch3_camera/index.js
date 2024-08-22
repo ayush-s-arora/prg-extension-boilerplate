@@ -355,7 +355,7 @@ class Scratch3Camera {
                     opcode: 'videoToggle',
                     text: formatMessage({
                         id: 'videoSensing.videoToggle',
-                        default: 'Turn video [VIDEO_STATE]',
+                        default: 'turn video [VIDEO_STATE]',
                         description: 'Controls display of the video preview layer'
                     }),
                     arguments: {
@@ -370,7 +370,7 @@ class Scratch3Camera {
                     opcode: 'setVideoTransparency',
                     text: formatMessage({
                         id: 'videoSensing.setVideoTransparency',
-                        default: 'Set video transparency to [TRANSPARENCY]%',
+                        default: 'set video transparency to [TRANSPARENCY]%',
                         description: 'Controls transparency of the video preview layer'
                     }),
                     arguments: {
@@ -384,7 +384,7 @@ class Scratch3Camera {
                     opcode: 'setVideoSource',
                     text: formatMessage({
                         id: 'videoSensing.setVideoSource',
-                        default: 'Set camera to [VIDEO_SOURCE]',
+                        default: 'set camera to [VIDEO_SOURCE]',
                         description: 'Controls video source of the video preview layer'
                     }),
                     arguments: {

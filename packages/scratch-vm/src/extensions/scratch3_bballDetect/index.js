@@ -85,8 +85,8 @@ const Object = {
     RIM: 'rim'
 }
 const Axis = {
-    X: 'X',
-    Y: 'Y'
+    X: 'x',
+    Y: 'y'
 }
 
 const EXTENSION_ID = 'bballDetect';
@@ -514,16 +514,16 @@ class Scratch3BballDetectBlocks {
             {
                 name: formatMessage({
                     id: 'axis.x',
-                    default: 'X',
-                    description: 'X-axis'
+                    default: 'x',
+                    description: 'x-axis'
                 }),
                 value: Axis.X
             },
             {
                 name: formatMessage({
-                    id: 'axis.Y',
-                    default: 'Y',
-                    description: 'Y-axis'
+                    id: 'axis.y',
+                    default: 'y',
+                    description: 'y-axis'
                 }),
                 value: Axis.Y
             }
@@ -563,7 +563,7 @@ class Scratch3BballDetectBlocks {
                     opcode: 'setContinuousDetection',
                     text: formatMessage({
                         id: 'videoSensing.continuousDetection',
-                        default: 'Turn continuous detection [DETECTION]',
+                        default: 'turn continuous detection [DETECTION]',
                         description: 'Controls whether model keeps detecting objects'
                     }),
                     arguments: {
@@ -577,7 +577,7 @@ class Scratch3BballDetectBlocks {
                 '---',
                 {
                     opcode: 'goToNearestObject',
-                    text: 'Go to nearest [OBJECT]',
+                    text: 'go to nearest [OBJECT]',
                     blockType: BlockType.COMMAND,
                     isTerminal: false,
                     arguments: {
@@ -590,7 +590,7 @@ class Scratch3BballDetectBlocks {
                 },
                 // {
                 //     opcode: 'drawBoxes',
-                //     text: 'Draw bounding boxes on all [OBJECTS]',
+                //     text: 'draw bounding boxes on all [OBJECTS]',
                 //     blockType: BlockType.COMMAND,
                 //     isTerminal: false,
                 //     arguments: {
@@ -605,7 +605,7 @@ class Scratch3BballDetectBlocks {
                     opcode: 'setDetectionRate',
                     text: formatMessage({
                         id: 'videoSensing.setDetectionRate',
-                        default: 'Set detection rate to [RATE] ms',
+                        default: 'set detection rate to [RATE] ms',
                         description: 'Controls detection rate passed to model'
                     }),
                     arguments: {
@@ -617,7 +617,7 @@ class Scratch3BballDetectBlocks {
                 },
                 {
                     opcode: 'clearAllDetections',
-                    text: 'Clear all detections',
+                    text: 'clear all detections',
                     blockType: BlockType.COMMAND,
                     isTerminal: false
                 },
@@ -626,7 +626,7 @@ class Scratch3BballDetectBlocks {
                 //     opcode: 'setVideoTransparency',
                 //     text: formatMessage({
                 //         id: 'videoSensing.setVideoTransparency',
-                //         default: 'Set video transparency to [TRANSPARENCY]%',
+                //         default: 'set video transparency to [TRANSPARENCY]%',
                 //         description: 'Controls transparency of the video preview layer'
                 //     }),
                 //     arguments: {
@@ -640,7 +640,7 @@ class Scratch3BballDetectBlocks {
                 //     opcode: 'videoToggle',
                 //     text: formatMessage({
                 //         id: 'videoSensing.videoToggle',
-                //         default: 'Turn video [VIDEO_STATE]',
+                //         default: 'turn video [VIDEO_STATE]',
                 //         description: 'Controls display of the video preview layer'
                 //     }),
                 //     arguments: {
@@ -654,7 +654,7 @@ class Scratch3BballDetectBlocks {
                 // '---',
                 {
                     opcode: 'whenObj',
-                    text: 'When [OBJECT] detected',
+                    text: 'when [OBJECT] detected',
                     blockType: BlockType.HAT,
                     isTerminal: true,
                     arguments: {
@@ -668,7 +668,7 @@ class Scratch3BballDetectBlocks {
                 '---',
                 {
                     opcode: 'currObjs',
-                    text: 'Current [OBJECTS] detected',
+                    text: 'current [OBJECTS] detected',
                     blockType: BlockType.REPORTER,
                     isTerminal: true,
                     arguments: {
@@ -681,7 +681,7 @@ class Scratch3BballDetectBlocks {
                 },
                 {
                     opcode: 'numDetected',
-                    text: 'Number of [OBJECTS] detected',
+                    text: 'number of [OBJECTS] detected',
                     blockType: BlockType.REPORTER,
                     isTerminal: true,
                     arguments: {
@@ -725,7 +725,7 @@ class Scratch3BballDetectBlocks {
                 },
                 // {
                 //     opcode: 'objectsXCoords',
-                //     text: 'X positions of [OBJECTS]',
+                //     text: 'x positions of [OBJECTS]',
                 //     blockType: BlockType.REPORTER,
                 //     isTerminal: true,
                 //     arguments: {
@@ -738,7 +738,7 @@ class Scratch3BballDetectBlocks {
                 // },
                 // {
                 //     opcode: 'objectsYCoords',
-                //     text: 'Y positions of [OBJECTS]',
+                //     text: 'y positions of [OBJECTS]',
                 //     blockType: BlockType.REPORTER,
                 //     isTerminal: true,
                 //     arguments: {
@@ -782,7 +782,7 @@ class Scratch3BballDetectBlocks {
                 },
                 {
                     opcode: 'objDist',
-                    text: 'Distance between nearest [OBJECT1] and [OBJECT2]',
+                    text: 'distance between nearest [OBJECT1] and [OBJECT2]',
                     blockType: BlockType.REPORTER,
                     isTerminal: true,
                     arguments: {
@@ -800,7 +800,7 @@ class Scratch3BballDetectBlocks {
                 },
                 {
                     opcode: 'objAngle',
-                    text: 'Acute angle between nearest [OBJECT1] and [OBJECT2]',
+                    text: 'acute angle between nearest [OBJECT1] and [OBJECT2]',
                     blockType: BlockType.REPORTER,
                     isTerminal: true,
                     arguments: {
@@ -1019,9 +1019,9 @@ class Scratch3BballDetectBlocks {
             objects = this.detections;
         }
         if (objects.length != 0) {
-            const xORy = args['AXIS'] === Axis.X ? 'x' : 'y'; //set to X if user argument is X, else set to y
+            const xORy = args['AXIS'] === Axis.X ? 'x' : 'y'; //set to x if user argument is x, else set to y
             for (const object of objects) {
-                const pos = this.tfPositiontoScratch(object.position)[xORy]; //access all X or Y positions
+                const pos = this.tfPositiontoScratch(object.position)[xORy]; //access all x or y positions
                 
                 posString += pos;
                 posString += "\n";

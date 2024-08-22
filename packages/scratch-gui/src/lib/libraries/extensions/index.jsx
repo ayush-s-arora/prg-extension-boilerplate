@@ -275,7 +275,22 @@ export default [
         launchPeripheralConnectionFlow: false,
         tags: ["tiilt Lab"]
     },
-
+    {
+        name: "Multi-Person Body Sensing",
+        extensionId: 'poseBodyMulti',
+        iconURL: poseBodyBlocksIconURL,
+        insetIconURL: poseBodyInsetIconURL,
+        description: (
+            <FormattedMessage
+                defaultMessage="Sense the body positions of multiple people with the camera."
+                description="PoseNet Description"
+                id="gui.extension.poseBodyMulti.description"
+            />
+        ),
+        featured: true,
+        launchPeripheralConnectionFlow: false,
+        tags: ["tiilt Lab"]
+    },
     {
         name: (
             <FormattedMessage

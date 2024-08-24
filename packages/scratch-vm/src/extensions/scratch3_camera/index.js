@@ -57,16 +57,22 @@ class Scratch3Camera {
          * @type {boolean}
          */
         this.firstInstall = true;
-        
+        this.videoDevices = [""];
+
         (async () => {
-            await this.getVideoSources();
-            videoDevices = this.videoDevices;
+            await this.getVideoPermission();
         })();
-        
-        this.runtime.on(
-            "CONNECT_CAMERAS",
-            this.connectCameras.bind(this)
-        );
+
+        if (this.runtime.ioDevices) {
+            this.runtime.on(Runtime.PROJECT_LOADED, this.projectStarted.bind(this));
+            this.runtime.on(Runtime.PROJECT_RUN_START, this.reset.bind(this));
+            this._loop();
+        }
+
+        // this.runtime.on(
+        //     "CONNECT_CAMERAS",
+        //     this.connectCameras.bind(this)
+        // );
     }
 
     /**
@@ -146,13 +152,25 @@ class Scratch3Camera {
         return state;
     }
 
-    async getVideoSources() {
+    async getVideoPermission () {
+        this.permission = await navigator.permissions.query({ name: 'camera' });
+        await navigator.mediaDevices.getUserMedia({ video: true });
         const devices = await navigator.mediaDevices.enumerateDevices();
-        this.videoDevices = devices.filter(device => device.kind === 'videoinput')
-        .map(device => ({
-            name: device.label || `Camera ${device.deviceId}`,
-            value: device.deviceId
-        }));
+        this.videoDevices = devices
+            .filter(device => device.kind === 'videoinput')
+            .map(device => ({
+                name: device.label || `Camera ${device.deviceId}`,
+                value: device.deviceId
+            }));
+    }
+
+    getVideoSourceNames () {
+        if (this.permission && this.permission.state === 'granted') {
+            this.videoDeviceNames = this.videoDevices.map(device => (device.name));
+        } else {
+            this.videoDeviceNames = [""];
+        }
+        return this.videoDeviceNames;
     }
 
     /**
@@ -163,9 +181,10 @@ class Scratch3Camera {
         this.setVideoTransparency({
             TRANSPARENCY: this.globalVideoTransparency
         });
-        this.videoToggle({
-            VIDEO_STATE: this.globalVideoState
-        });
+        // this.videoToggle({
+        //     VIDEO_STATE: this.globalVideoState
+        // });
+        //uncomment to enable video on load
     }
 
     reset () {
@@ -175,10 +194,21 @@ class Scratch3Camera {
     }
 
     isConnected() {
-        return (videoDevices[0].value != ""); //the primary video device has no value, implying it does not exist (its name is just the placeholder "Camera")
+        return (this.videoDevices[0] != ""); //there is only one video device and it has the default value of "", implying that no cameras are connected
     }
 
     connect() {
+    }
+
+    async _loop () {
+        while (true) {
+            if (this.videoDevices[0] != "") {
+                this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
+            } else {
+                this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECTED);
+            }
+            await new Promise(r => setTimeout(r, .001));
+        }
     }
    
     /**
@@ -308,16 +338,6 @@ class Scratch3Camera {
         ];
     }
 
-    get VIDEO_SOURCE_INFO () {
-        return videoDevices.map((device) => ({
-            name: formatMessage({
-                id: device.value,
-                default: device.name,
-                description: `Camera ${device.name}`
-            }),
-        }));
-    }
-
     /**
      * @returns {object} metadata for this extension and its blocks.
      */
@@ -345,12 +365,12 @@ class Scratch3Camera {
             blockIconURI: blockIconURI,
             menuIconURI: menuIconURI,
             blocks: [
-                {
-                        func: "CONNECT_CAMERAS",
-                        blockType: BlockType.BUTTON,
-                        text: "Initialize Camera Access and Refresh",
-                },
-                "---",
+                // {
+                //         func: "CONNECT_CAMERAS",
+                //         blockType: BlockType.BUTTON,
+                //         text: "Initialize Camera Access and Refresh",
+                // },
+                // "---",
                 {
                     opcode: 'videoToggle',
                     text: formatMessage({
@@ -390,7 +410,8 @@ class Scratch3Camera {
                     arguments: {
                         VIDEO_SOURCE: {
                             type: ArgumentType.NUMBER,
-                            menu: 'VIDEO_SOURCE'
+                            menu: 'VIDEO_SOURCE',
+                            defaultValue: this.getVideoSourceNames()[0],
                         }
                     }
                 }
@@ -400,10 +421,7 @@ class Scratch3Camera {
                     acceptReporters: true,
                     items: this._buildMenu(this.VIDEO_STATE_INFO)
                 },
-                VIDEO_SOURCE: {
-                    acceptReporters: true,
-                    items: this._buildMenu(this.VIDEO_SOURCE_INFO)
-                }
+                VIDEO_SOURCE: "getVideoSourceNames",
             }
         };
     }
@@ -417,7 +435,9 @@ class Scratch3Camera {
     videoToggle (args) {
         const state = args.VIDEO_STATE;
         this.globalVideoState = state;
+        console.log(state);
         if (state === VideoState.OFF) {
+            console.log("should be here");
             this.runtime.ioDevices.video.disableVideo();
         } else {
             this.runtime.ioDevices.video.enableVideo();
@@ -440,13 +460,16 @@ class Scratch3Camera {
     }
 
     setVideoSource (args) {
-        this.runtime.ioDevices.video.setVideoSource(videoDevices[args.VIDEO_SOURCE - 1]); //since args.VIDEO_SOURCE = the (n + 1) camera in the block's camera list
+        if (args) { //prevents crash if camera access is already granted, potentially since it takes a second to get the camera list for the corresponding block
+            const selectedDevice = this.videoDevices.find(device => device.name === args.VIDEO_SOURCE); //find the videoDevice, name and ID, that corresponds to the selected videoDeviceName
+            this.runtime.ioDevices.video.setVideoSource(selectedDevice); //since args.VIDEO_SOURCE = the (n + 1) camera in the block's camera list
+        }
     }
 
-    async connectCameras() {
-        await navigator.mediaDevices.getUserMedia({ video: true });
-        sessionStorage.setItem('scrollPosition', window.scrollY);
-        location.reload();
-    }
+    // async connectCameras() {
+    //     await navigator.mediaDevices.getUserMedia({ video: true });
+    //     sessionStorage.setItem('scrollPosition', window.scrollY);
+    //     location.reload();
+    // }
 }
 module.exports = Scratch3Camera;

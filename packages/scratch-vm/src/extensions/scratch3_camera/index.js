@@ -32,7 +32,10 @@ const VideoState = {
 
 const EXTENSION_ID = 'camera';
 
-let videoDevices = [];
+const defaultDevice = {name: "Default Camera", type: ""};
+
+let selectedDevice = defaultDevice;
+
 
 /**
  * Class for the motion-related blocks in Scratch 3.0
@@ -57,7 +60,7 @@ class Scratch3Camera {
          * @type {boolean}
          */
         this.firstInstall = true;
-        this.videoDevices = [""];
+        this.videoDevices = [defaultDevice];
 
         (async () => {
             await this.getVideoPermission();
@@ -68,6 +71,9 @@ class Scratch3Camera {
             this.runtime.on(Runtime.PROJECT_RUN_START, this.reset.bind(this));
             this._loop();
         }
+
+        //allows for refresh of camera devices if they change after load
+        navigator.mediaDevices.ondevicechange = this.getVideoPermission.bind(this);
 
         // this.runtime.on(
         //     "CONNECT_CAMERAS",
@@ -167,8 +173,12 @@ class Scratch3Camera {
     getVideoSourceNames () {
         if (this.permission && this.permission.state === 'granted') {
             this.videoDeviceNames = this.videoDevices.map(device => (device.name));
+            if (!this.videoDeviceNames.includes(defaultDevice.name)) { //handles edge case where user has imported a project that already uses "Default Camera" and then grants permission to webcams, preventing duplicate "Default Camera"
+                this.videoDeviceNames.unshift(defaultDevice.name);
+            }
         } else {
-            this.videoDeviceNames = [""];
+            this.videoDevices = [defaultDevice];
+            this.videoDeviceNames = [defaultDevice.name];
         }
         return this.videoDeviceNames;
     }
@@ -194,7 +204,7 @@ class Scratch3Camera {
     }
 
     isConnected() {
-        return (this.videoDevices[0] != ""); //there is only one video device and it has the default value of "", implying that no cameras are connected
+        return (this.videoDevices[0].name != "Default Camera" && this.videoDevices[0].value != ""); //if false, there is only one video device and it has the default name and value, implying that no cameras are connected
     }
 
     connect() {
@@ -207,7 +217,7 @@ class Scratch3Camera {
             } else {
                 this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECTED);
             }
-            await new Promise(r => setTimeout(r, .001));
+            await new Promise(r => setTimeout(r, 1));
         }
     }
    
@@ -387,6 +397,10 @@ class Scratch3Camera {
                     }
                 },
                 {
+                    opcode: 'restartVideo',
+                    text: 'restart video'
+                },
+                {
                     opcode: 'setVideoTransparency',
                     text: formatMessage({
                         id: 'videoSensing.setVideoTransparency',
@@ -435,15 +449,21 @@ class Scratch3Camera {
     videoToggle (args) {
         const state = args.VIDEO_STATE;
         this.globalVideoState = state;
-        console.log(state);
         if (state === VideoState.OFF) {
-            console.log("should be here");
             this.runtime.ioDevices.video.disableVideo();
         } else {
             this.runtime.ioDevices.video.enableVideo();
             // Mirror if state is ON. Do not mirror if state is ON_FLIPPED.
             this.runtime.ioDevices.video.mirror = state === VideoState.ON;
         }
+    }
+
+    restartVideo () {
+        if (selectedDevice) { //if false, the user has selected "Default Camera," which is undefined since it is not one of the user's connected cameras (it's in videoDeviceNames, but not videoDevices)
+            selectedDevice = this.videoDevices.find(device => device.name === selectedDevice.name);
+        }
+        this.runtime.ioDevices.video.enableVideo();
+        this.runtime.ioDevices.video.setVideoSource(selectedDevice); //works fine with "Default Camera" since setting the video source to undefined just sets the video to the default source!
     }
 
     /**
@@ -460,16 +480,8 @@ class Scratch3Camera {
     }
 
     setVideoSource (args) {
-        if (args) { //prevents crash if camera access is already granted, potentially since it takes a second to get the camera list for the corresponding block
-            const selectedDevice = this.videoDevices.find(device => device.name === args.VIDEO_SOURCE); //find the videoDevice, name and ID, that corresponds to the selected videoDeviceName
-            this.runtime.ioDevices.video.setVideoSource(selectedDevice); //since args.VIDEO_SOURCE = the (n + 1) camera in the block's camera list
-        }
+        selectedDevice = this.videoDevices.find(device => device.name === args.VIDEO_SOURCE); //find the videoDevice, name and ID, that corresponds to the selected videoDeviceName
+        this.runtime.ioDevices.video.setVideoSource(selectedDevice); //works fine with "Default Camera" since setting the video source to undefined just sets the video to the default source!
     }
-
-    // async connectCameras() {
-    //     await navigator.mediaDevices.getUserMedia({ video: true });
-    //     sessionStorage.setItem('scrollPosition', window.scrollY);
-    //     location.reload();
-    // }
 }
 module.exports = Scratch3Camera;

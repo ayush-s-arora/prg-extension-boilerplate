@@ -198,9 +198,10 @@ class Scratch3PoseNetBlocks {
         this.setVideoTransparency({
             TRANSPARENCY: this.globalVideoTransparency
         });
-        this.videoToggle({
-            VIDEO_STATE: this.globalVideoState
-        });
+        // this.videoToggle({
+        //     VIDEO_STATE: this.globalVideoState
+        // });
+        //uncomment to automatically start video upon extension load (commented due to Camera Settings extension)
     }
 
     reset () {

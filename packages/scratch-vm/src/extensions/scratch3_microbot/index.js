@@ -582,8 +582,30 @@ class MicrobitRobot {
         // console.log(args.DIR);
         if (args.DEVICE in this.accelerometer) {
             return this.accelerometer[args.DEVICE][args.DIR];
-        }
-        else {
+            //unsuccessful attempts to manually calculate roll and pitch, instead of using received values
+            // let x = this.accelerometer[args.DEVICE]["y"];
+            // let y = -(this.accelerometer[args.DEVICE]["x"]);
+            // let z = -(this.accelerometer[args.DEVICE]["z"]); //all based on the NORTH_EAST_DOWN system microbit employs
+            // if (args.DIR == "roll" || args.DIR == "pitch") {
+            //     let rollRadians = Math.atan2(y, z);
+            //     if (args.DIR == "roll") {
+            //         console.log(this.accelerometer[args.DEVICE]["roll"]); //debug
+            //         // let calculation = Math.floor((360 * rollRadians) / (2 * Math.PI))
+            //         return Math.floor((360 * rollRadians) / (2 * Math.PI))
+            //         // if (calculation < 0) {
+            //         //     return -(calculation + 180);
+            //         // } else {
+            //         //     return 180 - calculation;
+            //         // }
+                // } else {
+                //     let pitchRadians = Math.atan(-x / (y * Math.sin(rollRadians) + z * Math.cos(rollRadians)));
+                //     console.log(this.accelerometer[args.DEVICE]["pitch"]); //debug
+                //     return Math.floor((360 * pitchRadians) / (2 * Math.PI));    
+                // }
+            // } else {
+            //     return this.accelerometer[args.DEVICE][args.DIR];
+            // }
+        } else {
             return null;
         }
     }

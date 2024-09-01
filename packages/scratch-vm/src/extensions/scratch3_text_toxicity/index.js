@@ -104,9 +104,10 @@ class Scratch3Vision {
             this.setVideoTransparency({
                 TRANSPARENCY: 10
             });
-            this.videoToggle({
-                VIDEO_STATE: this.globalVideoState
-            });
+            // this.videoToggle({
+            //     VIDEO_STATE: this.globalVideoState
+            // });
+            //uncomment to automatically start video upon extension load (commented due to Camera Settings extension)
         }
 
         setInterval(async () => {

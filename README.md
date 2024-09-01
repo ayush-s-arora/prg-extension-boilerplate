@@ -4,7 +4,7 @@ In its current state, this repository does **not** support loading extensions fr
 
 There needs to be at least one extension folder in [/extensions/src/](extensions/src) for ``npm run build`` to execute. In our case, it's [objectDetection](extensions/src/objectDetection). However, [objectDetection](extensions/src/objectDetection) does not load into the GUI.
 
-If you would like to load extensions from [/extensions/src/](extensions/src) into the GUI, please uncomment lines 2 and 77 in [index.jsx](packages/scratch-gui/src/lib/libraries/extensions/index.jsx). That *should* restore functionality.
+If you would like to load extensions from [/extensions/src/](extensions/src) into the GUI, please uncomment lines 2 and 80 (involving ``generatedDetails``) in [index.jsx](packages/scratch-gui/src/lib/libraries/extensions/index.jsx). That *should* restore functionality.
 
 # ✨ PRG Scratch Extension Development Environment
 

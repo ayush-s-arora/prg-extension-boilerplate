@@ -7,7 +7,7 @@ const Cast = require('../../util/cast');
 const formatMessage = require('format-message');
 const Video = require('../../io/video');
 const tf = require('@tensorflow/tfjs');
-const modelUrl = './static/models/tf-bballDetect/tfmodel.json';
+const modelUrl = './static/models/tf-bballDetect/model.json';
 require("@tensorflow/tfjs-backend-webgl");
 tf.setBackend('webgl');
 
@@ -91,7 +91,7 @@ const Axis = {
 
 const EXTENSION_ID = 'bballDetect';
 
-let detections = [];
+let model;
 
 /**
  * Class for the motion-related blocks in Scratch 3.0
@@ -99,19 +99,30 @@ let detections = [];
  * @constructor
  */
 class Scratch3BballDetectBlocks {
-    async loadAndPredict() {
-        // Load the model
-        const model = await tf.loadLayersModel(modelUrl);
-    
-        const scaledSquareDimension = 96;
-    
-        // Preprocess the image
-        let imageData2 = tf.browser.fromPixels(this.currImage);
-        imageData2 = tf.image.resizeBilinear(imageData2, [scaledSquareDimension, scaledSquareDimension]);
-        imageData2 = imageData2.div(tf.scalar(255)); // Normalize to [0, 1]
-        const input = imageData2.expandDims(0); // Add batch dimension
+
+    async loadModel () {
+        model = await tf.loadGraphModel(modelUrl);
+    }
+
+    async generatePrediction () {
+        const scaledSquareDimension = 128;
+        
+        //Ensure model is loaded before proceeding (necessary if other extensions have loaded before Sport Finder)
+        if (!model) {
+            await this.loadModel();
+        }
+
         if (this.globalDetection === Detection.ON) {
-            const resultTensors = await model.predict(input); //[1, 12, 12, 3] - 96 x 96 split into 12 x 12, each consisting of 8 x 8 pixels. 3 for basketball, rim, background
+            const resultTensors = await tf.tidy(() => {
+                //Preprocess the image
+                let imageData2 = tf.browser.fromPixels(this.currImage);
+                imageData2 = tf.image.resizeBilinear(imageData2, [scaledSquareDimension, scaledSquareDimension]);
+                imageData2 = imageData2.div(tf.scalar(255)); // Normalize to [0, 1]
+                const input = imageData2.expandDims(0); // Add batch dimension
+                //Process the image
+                return model.predict(input); //[1, 128, 128, 3] - 3 for basketball, rim, background
+            });
+            //Extract results
             let scores_max = resultTensors.max(axis = 3); //axis = 3 for values of basketball, rim, background
             let scores_maxClass = resultTensors.argMax(axis = 3); //axis = 3 for basketball, rim, background
             let scoresMaxArray = scores_max.dataSync();
@@ -140,6 +151,9 @@ class Scratch3BballDetectBlocks {
                     }
                 }
             }    
+            scores_max.dispose();
+            scores_maxClass.dispose();
+            resultTensors.dispose();
             // console.log(this.detections);
         }
     }    
@@ -155,6 +169,7 @@ class Scratch3BballDetectBlocks {
         this.runtime.registerPeripheralExtension(EXTENSION_ID, this);
         this.runtime.connectPeripheral(EXTENSION_ID, 0);
         this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
+        this.loadModel();
 
         /**
          * A flag to determine if this extension has been installed in a project.
@@ -256,9 +271,10 @@ class Scratch3BballDetectBlocks {
         this.setVideoTransparency({
             TRANSPARENCY: this.globalVideoTransparency
         });
-        this.videoToggle({
-            VIDEO_STATE: this.globalVideoState
-        });
+        // this.videoToggle({
+        //     VIDEO_STATE: this.globalVideoState
+        // });
+        //uncomment to automatically start video upon extension load (commented due to Camera Settings extension)
     }
 
     reset () {
@@ -283,9 +299,8 @@ class Scratch3BballDetectBlocks {
             });
             
             if (frame) {
-                this.objectCenters = {"basketball": [], "hoop": []};
                 this.currImage = frame;
-                await this.loadAndPredict();
+                await this.generatePrediction();
                 if (this.globalDetection == Detection.ON) {
                     if (this.detections.length != 0) {
                         this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
@@ -434,19 +449,19 @@ class Scratch3BballDetectBlocks {
         return [
             {
                 name: formatMessage({
-                    id: 'detection.off',
-                    default: 'off',
-                    description: 'Option for the "Turn continuous detection [STATE]" block'
-                }),
-                value: Detection.OFF
-            },
-            {
-                name: formatMessage({
                     id: 'detection.on',
                     default: 'on',
                     description: 'Option for the "Turn continuous detection [STATE]" block'
                 }),
                 value: Detection.ON
+            },
+            {
+                name: formatMessage({
+                    id: 'detection.off',
+                    default: 'off',
+                    description: 'Option for the "Turn continuous detection [STATE]" block'
+                }),
+                value: Detection.OFF
             }
         ];
     }
@@ -541,7 +556,7 @@ class Scratch3BballDetectBlocks {
         if (this.firstInstall) {
             this.globalVideoState = VideoState.ON;
             this.globalVideoTransparency = 50;
-            this.globalDetectionRate = 130;
+            this.globalDetectionRate = 1;
             this.globalDetection = Detection.ON;
             this.projectStarted();
             this.firstInstall = false;
@@ -611,7 +626,7 @@ class Scratch3BballDetectBlocks {
                     arguments: {
                         RATE: {
                             type: ArgumentType.NUMBER,
-                            defaultValue: 130
+                            defaultValue: 1
                         }
                     }
                 },
@@ -1220,11 +1235,17 @@ class Scratch3BballDetectBlocks {
     }
 
     tfPositiontoScratch(position) {
-        const column = position % 12;
-        const row = Math.floor(position / 12);
+        const column = position % 16;
+        const row = Math.floor(position / 16); //16 since the 128 x 128 imageData is split into 256 squares, so there are 16 x 16 squares that comprise imageData
 
-        const x = (column * 40) - 240 + 20; // 40 is the cell width, 20 is the half-width of the cell
-        const y = 180 - (row * 30) - 15;   // 30 is the cell height, 15 is the half-height of the cell
+        const x = (column * 30) - 240 + 15; 
+        //30 px is the square width in terms of Scratch's dimensions (480/16).
+        //15 is the half-width of the square, centering the coordinate within the square.
+        //240 is half of the Scratch coordinate system's total width (480), offsetting the coordinates by -240 since position 0 (leftmost) is -240.
+        const y = 180 - (row * 22.5) - 11.25;
+        // 22.5 px is the square height in terms of Scratch's dimensions (360/16).
+        //11.25 is the half-height of the square, centering the coordinate within the square.
+        //180 is half the Scratch coordinate system's total height (360), offsetting the coordinates by 180 since position 0 (topmost) is 180.
         return {x, y};
     }
 

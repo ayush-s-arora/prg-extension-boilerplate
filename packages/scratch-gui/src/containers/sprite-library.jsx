@@ -1,4 +1,4 @@
-import bindAll from 'lodash.bindall';
+  import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {injectIntl, intlShape, defineMessages} from 'react-intl';

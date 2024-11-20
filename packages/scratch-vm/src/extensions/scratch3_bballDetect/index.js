@@ -10,6 +10,7 @@ const tf = require('@tensorflow/tfjs');
 const modelUrl = './static/models/tf-bballDetect/model.json';
 require("@tensorflow/tfjs-backend-webgl");
 tf.setBackend('webgl');
+const StageLayering = require('../../engine/stage-layering');
 
 /**
  * Icon svg to be displayed in the blocks category menu, encoded as a data URI.
@@ -72,7 +73,11 @@ const Detection = {
     OFF: 'off',
 
     /**  Model is detecting */
-    ON: 'on',
+    ON: 'on'
+};
+const Visibility = {
+    SHOW: 'show',
+    HIDE: 'hide'
 };
 const Objects = {
     // ALL: 'objects',
@@ -83,11 +88,14 @@ const Object = {
     // ANY: 'object',
     BASKETBALL: 'basketball',
     RIM: 'rim'
-}
+};
 const Axis = {
     X: 'x',
     Y: 'y'
-}
+};
+const Event = {
+    PASS: 'pass'
+};
 
 const EXTENSION_ID = 'bballDetect';
 
@@ -170,6 +178,7 @@ class Scratch3BballDetectBlocks {
         this.runtime.connectPeripheral(EXTENSION_ID, 0);
         this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
         this.loadModel();
+        this.skinID = -1; //for drawing pass lines
 
         /**
          * A flag to determine if this extension has been installed in a project.
@@ -195,9 +204,6 @@ class Scratch3BballDetectBlocks {
         return [480, 360];
     }
 
-    static get MODELDIMENSIONS () {
-        return [640, 640];
-    }
     /**
      * The key to load & store a target's motion-related state.
      * @type {string}
@@ -445,6 +451,27 @@ class Scratch3BballDetectBlocks {
         ];
     }
 
+    get VISIBILITY_INFO () {
+        return [
+            {
+                name: formatMessage({
+                    id: 'visibility.show',
+                    default: 'show',
+                    description: 'Option for the "[STATE] pass lines" block'
+                }),
+                value: Visibility.SHOW
+            },
+            {
+                name: formatMessage({
+                    id: 'visibility.hide',
+                    default: 'hide',
+                    description: 'Option for the "[STATE] pass lines" block'
+                }),
+                value: Visibility.HIDE
+            }
+        ];
+    }
+
     get DETECTION_INFO () {
         return [
             {
@@ -524,6 +551,36 @@ class Scratch3BballDetectBlocks {
         ]
     }
 
+    get EVENT_INFO () {
+        return [
+            {
+                name: formatMessage({
+                    id: 'object.basketball',
+                    default: 'basketball',
+                    description: 'Singular basketball'
+                }),
+                value: Object.BASKETBALL
+            },
+            {
+                name: formatMessage({
+                    id: 'object.rim',
+                    default: 'rim',
+                    description: 'Singular rim'
+                }),
+                value: Object.RIM
+            },
+            {
+                name: formatMessage({
+                    id: 'event.pass',
+                    default: 'pass',
+                    description: 'A pass - when basketball object passes the middle of the screen'
+                }),
+                value: Event.PASS
+            }
+        ]
+    }
+
+
     get AXIS_INFO () {
         return [
             {
@@ -586,6 +643,21 @@ class Scratch3BballDetectBlocks {
                             type: ArgumentType.NUMBER,
                             menu: 'DETECTION',
                             defaultValue: Detection.ON,
+                        }
+                    }
+                },
+                {
+                    opcode: 'setPassLineVisibility',
+                    text: formatMessage({
+                        id: 'videoSensing.passlines',
+                        default: '[VISIBILITY] pass lines',
+                        description: 'Controls whether canvas shows pass lines'
+                    }),
+                    arguments: {
+                        VISIBILITY: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'VISIBILITY',
+                            defaultValue: Visibility.SHOW,
                         }
                     }
                 },
@@ -668,14 +740,14 @@ class Scratch3BballDetectBlocks {
                 // },
                 // '---',
                 {
-                    opcode: 'whenObj',
-                    text: 'when [OBJECT] detected',
-                    blockType: BlockType.HAT,
+                    opcode: 'ifEvent',
+                    text: '[EVENT] detected',
+                    blockType: BlockType.BOOLEAN,
                     isTerminal: true,
                     arguments: {
-                        OBJECT: {
+                        EVENT: {
                             type: ArgumentType.NUMBER,
-                            menu: 'OBJECT',
+                            menu: 'EVENT',
                             defaultValue: Object.BASKETBALL,
                         },
                     }
@@ -845,6 +917,10 @@ class Scratch3BballDetectBlocks {
                     acceptReporters: true,
                     items: this._buildMenu(this.VIDEO_STATE_INFO)
                 },
+                VISIBILITY: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.VISIBILITY_INFO)
+                },
                 DETECTION: {
                     acceptReporters: true,
                     items: this._buildMenu(this.DETECTION_INFO)
@@ -856,6 +932,10 @@ class Scratch3BballDetectBlocks {
                 OBJECT: {
                     acceptReporters: true,
                     items: this._buildMenu(this.OBJECT_INFO)
+                },
+                EVENT: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.EVENT_INFO)
                 },
                 AXIS: {
                     acceptReporters: true,
@@ -917,15 +997,95 @@ class Scratch3BballDetectBlocks {
      * @param {BlockUtility} util - the block utility
      * @returns {number} class name if video frame matched, empty number if model not loaded yet
      */
-    whenObj(args, util) {
-        if (args['OBJECT'] === Object.BASKETBALL) {
+    ifEvent(args, util) {
+        if (args['EVENT'] === Object.BASKETBALL) {
             return (this.detections.filter(detection => detection.class === "Basketball").length != 0);
-        } else if (args['OBJECT'] === Object.RIM) {
+        } else if (args['EVENT'] === Object.RIM) {
             return (this.detections.filter(detection => detection.class === "Rim").length != 0);
+        } else if (args['EVENT'] === Event.PASS) {
+            return this.isPassDetected();
         } else {
             return this.detections.length != 0;
         }
     }
+
+    // async isPassDetected() {
+    //     const renderer = this.runtime.renderer;
+    //     let passDetected = false;
+    //     const basketballs = this.detections.filter(detection => detection.class === "Basketball");
+    
+    //     if (basketballs.length === 0) return false;
+    
+    //     try {
+    //         for (const bball of basketballs) {
+    //             const startX = this.tfPositiontoScratch(bball.position).x;
+    //             if (startX <= (renderer._xLeft + 20)) {
+    //                 console.log('here', startX)
+    //                 passDetected = await this.checkPass(bball, 'left-to-right', renderer);
+    //             } else if (startX >= (renderer._xRight - 20)) {
+    //                 passDetected = await this.checkPass(bball, 'right-to-left', renderer);
+    //             }
+    
+    //             if (passDetected) break;
+    //         }
+    //     } catch (error) {
+    //         console.error('Error in isPassDetected:', error);
+    //         return false;
+    //     }
+    //     return passDetected;
+    // }
+    
+    // async checkPass(bball, direction, renderer) {
+    //     return new Promise((resolve) => {
+    //         setTimeout(() => {
+    //             const endX = this.tfPositiontoScratch(bball.position).x;
+    //             if (direction === 'left-to-right' && endX >= (renderer._xRight - 20)) {
+    //                 resolve(true);
+    //             } else if (direction === 'right-to-left' && endX <= (renderer._xLeft + 20)) {
+    //                 resolve(true);
+    //             } else {
+    //                 resolve(false);
+    //             }
+    //         }, 1000); //1000 ms to make pass
+    //     });
+    // }
+
+    isPassDetected() {
+        const renderer = this.runtime.renderer;
+        const basketballs = this.detections.filter(detection => detection.class === "Basketball");
+    
+        if (basketballs.length === 0) return false;
+    
+        for (const bball of basketballs) {
+            const x = this.tfPositiontoScratch(bball.position).x;
+               
+            if (x <= (renderer._xLeft + 50) || x >= (renderer._xRight - 50)) { //the pass lines are +-20, but this is +- 50 to allow for some leeway
+                if (!this.potentialPass) {
+                    this.potentialPass = {
+                        startX: x,
+                        startTime: Date.now(),
+                        direction: x <= (renderer._xLeft + 50) ? 'left-to-right' : 'right-to-left'
+                    };
+                } else {
+                    const timeDiff = Date.now() - this.potentialPass.startTime;
+
+                    if (timeDiff <= 2000) { //2000 ms to make a pass
+                        if ((this.potentialPass.direction === 'left-to-right' && x >= (renderer._xRight - 50)) ||
+                            (this.potentialPass.direction === 'right-to-left' && x <= (renderer._xLeft + 50))) {
+                            this.potentialPass = null;
+                            console.log("Pass detected!");
+                            return true;
+                        }
+                    } else {
+                        this.potentialPass = null; //reset potential pass now that time's up
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    
     
     currObjs(args, util) {
         let objects = [];
@@ -1265,6 +1425,34 @@ class Scratch3BballDetectBlocks {
             // Mirror if state is ON. Do not mirror if state is ON_FLIPPED.
             this.runtime.ioDevices.video.mirror = state === VideoState.ON;
         }
+    }
+    setPassLineVisibility (args) {
+        const state = args.VISIBILITY;
+        const renderer = this.runtime.renderer;
+        const passLinesDrawableID = renderer.createDrawable(StageLayering.PEN_LAYER);
+        if (this.skinID < 0) { //only create skinID once
+            this.skinID = renderer.createPenSkin();
+        }
+        if (state === Visibility.SHOW) {
+            const lines = [
+                { startX: 0, startY: renderer._yTop, endX: 0, endY: renderer._yBottom }, //middle line
+                { startX: renderer._xLeft + 20, startY: 203, endX: renderer._xLeft + 20, endY: -203 }, //left line, + 20 for visibility
+                { startX: renderer._xRight - 20, startY: 203, endX: renderer._xRight - 20, endY: -203 } //right line, - 20 for visibility
+            ];
+            const lineProps =   { 
+                color4f: [78 / 255, 42 / 255, 132 / 255, 1], //rgba(78, 42, 132, 1), in line with header
+                diameter: 3
+            }
+
+            lines.forEach(line => {
+                renderer.penLine(this.skinID, lineProps, line.startX, line.startY, line.endX, line.endY);
+            });
+
+            renderer.updateDrawableSkinId(passLinesDrawableID, this.skinID);
+        } else {
+            renderer.penClear(this.skinID);
+        }
+        this.runtime.requestRedraw();
     }
 
     /**

@@ -1,6 +1,10 @@
 .DS_Store
 ./**/.DS_Store
 
+# Zone.Identifier files are artifacts that appear when working in Windows Subsystem for Linux.
+# They cause issues when cloning repo on Windows and are not necessary for project functionality.
+*Zone.Identifier
+
 # Logs
 logs
 *.log

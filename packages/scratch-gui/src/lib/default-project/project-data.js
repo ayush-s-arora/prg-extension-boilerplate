@@ -95,7 +95,7 @@ const projectData = translateFunction => {
                 sounds: [
                     {
                         assetId: '93c36d806dc92327b9e7049a565c6bff',
-                        name: 'Robot',
+                        name: 'Basketball Bounce',
                         dataFormat: 'wav',
                         format: '',
                         rate: 22050,

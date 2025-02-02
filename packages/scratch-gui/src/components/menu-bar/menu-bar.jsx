@@ -141,9 +141,9 @@ const MenuItemTooltip = ({id, isRtl, children, className}) => (
     </ComingSoonTooltip>
 );
 
-const APP_ID = '906634949042'; // first part of client ID
-const CLIENT_ID = '906634949042-5jbc7q594e69spg2i0bkt9a14iojvtsp.apps.googleusercontent.com';
-const DEVELOPER_KEY = 'AIzaSyDRoOjwaDXOxq4cda1nrCVLaVQvTCh5GYE';
+const APP_ID = '1018220554528'; // first part of client ID
+const CLIENT_ID = '1018220554528-p98stvb91kdg17tef1ar0kcarhmuc8ns.apps.googleusercontent.com';
+const DEVELOPER_KEY = 'AIzaSyCufzRsIOJCXR62IBrn445Pvlps5GVNcY0';
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
 

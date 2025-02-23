@@ -78,6 +78,7 @@ import sharedMessages from '../../lib/shared-messages';
 
 import loadScript from 'load-script';
 const GOOGLE_SDK_URL = 'https://apis.google.com/js/api.js';
+const GSI_URL = 'https://accounts.google.com/gsi/client'
 let scriptLoadingStarted = false;
 
 
@@ -305,13 +306,13 @@ class MenuBar extends React.Component {
         }
     }
     doAuth(callback) {
-        window.gapi.auth.authorize({
+        const client = google.accounts.oauth2.initTokenClient({
             client_id: CLIENT_ID,
             scope: DRIVE_SCOPE,
-            immediate: false
-            },
-            callback
-        );
+            callback: callback,
+        });
+    
+        client.requestAccessToken();
     }
     handleClickLoadProjectLink() {
         let templateLink = "https://www.dropbox.com/s/o8jegh940y7f7qc/SimpleProject.sb3";
@@ -332,23 +333,27 @@ class MenuBar extends React.Component {
         this.props.onRequestCloseFile();
     }
     handleClickDriveSave() {
+        if (this.isGoogleReady()) {
+            this.onApiLoad();
+        } else if (!scriptLoadingStarted) {
+            scriptLoadingStarted = true;
+            loadScript(GOOGLE_SDK_URL, this.onApiLoad);
+        } else {
+            // is loading
+        }
         // make sure user has logged into Google Drive
         if (!this.state.authToken) {
             this.doAuth(response => {
-                console.log("here")
-                console.log(response)
                 if (response.access_token) {
                     this.handleDriveAuthenticate(response.access_token);
                     this.handleClickDriveSave();
                 }
             });
-            console.log("we appear to be here")
             this.props.onRequestCloseFile();
             return;
         }
         // check if we have already created file
         let fileId = this.state.fileId;
-        console.log(fileId)
         if (!fileId) {
             if (this.isGoogleDriveReady()) {
                 let fileName = prompt("Name your project", this.props.projectTitle);
@@ -380,8 +385,6 @@ class MenuBar extends React.Component {
         this.setState({
             authToken: token
         });
-        console.log("we definitely should be here now...")
-        console.log(this.state.authToken)
     }
     getProjectTitleFromFilename (fileInputFilename) {
         if (!fileInputFilename) return '';
@@ -432,10 +435,15 @@ class MenuBar extends React.Component {
     }
     
     onApiLoad() {
-        window.gapi.load('auth');
-        window.gapi.load('client', () => {
-            window.gapi.client.load('drive', 'v3');
+        loadScript(GSI_URL);
+        window.gapi.load('client', this.onClientLoad);
+    }
+
+    onClientLoad() {
+        window.gapi.client.init({
+            apiKey: DEVELOPER_KEY,
         });
+        window.gapi.client.load('drive', 'v3')
     }
 
 

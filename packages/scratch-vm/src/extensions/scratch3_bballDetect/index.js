@@ -946,38 +946,12 @@ class Scratch3BballDetectBlocks {
     }
 
     goToNearestObject(args, util) {
-        let nearestDetection = null;
-        let nearestDistance = Infinity;
-        let objects = [];
-        if (args['OBJECT'] === Object.BASKETBALL) {
-            objects = this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECT'] === Object.RIM) {
-            objects = this.detections.filter(detection => detection.class === "Rim");
-        } else {
-            objects = this.detections;
+        let nearestObject = this.nearestHelper(args['OBJECT'], util);
+        // If a nearest object was found, move the sprite to its position
+        if (nearestObject) {
+            util.target.setXY(nearestObject.x, nearestObject.y, false);
         }
-        if (objects.length != 0) {
-            for (const object of objects) {
-                const x = this.tfPositiontoScratch(object.position).x;
-                const y = this.tfPositiontoScratch(object.position).y;
-
-                // Calculate the distance from the current sprite position to the detection
-                const spriteX = util.target.x; // Current sprite x position
-                const spriteY = util.target.y; // Current sprite y position
-                const distance = Math.sqrt(Math.pow(x - spriteX, 2) + Math.pow(y - spriteY, 2));
-
-                // Update nearestDetection if this one is closer
-                if (distance < nearestDistance) {
-                    nearestDistance = distance;
-                    nearestDetection = { x, y }; // Store the coordinates of the nearest detection
-                }
-            }
-            // If a nearest detection was found, move the sprite to its position
-            if (nearestDetection) {
-                util.target.setXY(nearestDetection.x, nearestDetection.y, false);
-            }
-        }
-    }  
+    }
 
     clearFrame() {
         // Iterate over current drawables and destroy them
@@ -998,61 +972,16 @@ class Scratch3BballDetectBlocks {
      * @returns {number} class name if video frame matched, empty number if model not loaded yet
      */
     ifEvent(args, util) {
-        if (args['EVENT'] === Object.BASKETBALL) {
-            return (this.detections.filter(detection => detection.class === "Basketball").length != 0);
-        } else if (args['EVENT'] === Object.RIM) {
-            return (this.detections.filter(detection => detection.class === "Rim").length != 0);
-        } else if (args['EVENT'] === Event.PASS) {
+        if (args['EVENT'] === Event.PASS) {
             return this.isPassDetected();
         } else {
-            return this.detections.length != 0;
+            return (this.filterDetections(args['EVENT']).length != 0)
         }
     }
 
-    // async isPassDetected() {
-    //     const renderer = this.runtime.renderer;
-    //     let passDetected = false;
-    //     const basketballs = this.detections.filter(detection => detection.class === "Basketball");
-    
-    //     if (basketballs.length === 0) return false;
-    
-    //     try {
-    //         for (const bball of basketballs) {
-    //             const startX = this.tfPositiontoScratch(bball.position).x;
-    //             if (startX <= (renderer._xLeft + 20)) {
-    //                 console.log('here', startX)
-    //                 passDetected = await this.checkPass(bball, 'left-to-right', renderer);
-    //             } else if (startX >= (renderer._xRight - 20)) {
-    //                 passDetected = await this.checkPass(bball, 'right-to-left', renderer);
-    //             }
-    
-    //             if (passDetected) break;
-    //         }
-    //     } catch (error) {
-    //         console.error('Error in isPassDetected:', error);
-    //         return false;
-    //     }
-    //     return passDetected;
-    // }
-    
-    // async checkPass(bball, direction, renderer) {
-    //     return new Promise((resolve) => {
-    //         setTimeout(() => {
-    //             const endX = this.tfPositiontoScratch(bball.position).x;
-    //             if (direction === 'left-to-right' && endX >= (renderer._xRight - 20)) {
-    //                 resolve(true);
-    //             } else if (direction === 'right-to-left' && endX <= (renderer._xLeft + 20)) {
-    //                 resolve(true);
-    //             } else {
-    //                 resolve(false);
-    //             }
-    //         }, 1000); //1000 ms to make pass
-    //     });
-    // }
-
     isPassDetected() {
         const renderer = this.runtime.renderer;
-        const basketballs = this.detections.filter(detection => detection.class === "Basketball");
+        const basketballs = this.filterDetections(Objects.BASKETBALL);
     
         if (basketballs.length === 0) return false;
     
@@ -1068,7 +997,6 @@ class Scratch3BballDetectBlocks {
                     };
                 } else {
                     const timeDiff = Date.now() - this.potentialPass.startTime;
-
                     if (timeDiff <= 2000) { //2000 ms to make a pass
                         if ((this.potentialPass.direction === 'left-to-right' && x >= (renderer._xRight - 50)) ||
                             (this.potentialPass.direction === 'right-to-left' && x <= (renderer._xLeft + 50))) {
@@ -1085,17 +1013,9 @@ class Scratch3BballDetectBlocks {
         return false;
     }
     
-    
-    
     currObjs(args, util) {
         let objects = [];
-        if (args['OBJECTS'] === Objects.BASKETBALL) {
-            objects = this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECTS'] === Objects.RIM) {
-            objects = this.detections.filter(detection => detection.class === "Rim");
-        } else {
-            objects = this.detections;
-        }
+        objects = this.filterDetections(args['OBJECTS'])
         if (objects.length != 0) {
             let outputString = "";
             for (const object of objects) {     
@@ -1111,13 +1031,7 @@ class Scratch3BballDetectBlocks {
     }
 
     numDetected(args, util) {
-        if (args['OBJECTS'] === Objects.BASKETBALL) {
-            return this.detections.filter(detection => detection.class === "Basketball").length;
-        } else if (args['OBJECTS'] === Objects.RIM) {
-            return this.detections.filter(detection => detection.class === "Rim").length;
-        } else {
-            return this.detections.length;
-        }
+        return this.filterDetections(args['OBJECTS']).length;
     }
 
     // objectsCoords(args, util) {
@@ -1184,15 +1098,8 @@ class Scratch3BballDetectBlocks {
     // }
 
     objectsPos(args, util) {
-        let objects = [];
+        let objects = this.filterDetections(args['OBJECTS']);
         let posString = "";
-        if (args['OBJECTS'] === Objects.BASKETBALL) {
-            objects = this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECTS'] === Objects.RIM) {
-            objects = this.detections.filter(detection => detection.class === "Rim");
-        } else {
-            objects = this.detections;
-        }
         if (objects.length != 0) {
             const xORy = args['AXIS'] === Axis.X ? 'x' : 'y'; //set to x if user argument is x, else set to y
             for (const object of objects) {
@@ -1202,195 +1109,55 @@ class Scratch3BballDetectBlocks {
                 posString += "\n";
             }
             return posString;
+        } else {
+            return `No ${args['OBJECTS']} found!`;
         }
     }
 
     nearestCoords(args, util) {
-        let nearestDetection = null;
-        let nearestDistance = Infinity;
-        let objects = [];
-        if (args['OBJECT'] === Object.BASKETBALL) {
-            objects = this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECT'] === Object.RIM) {
-            objects = this.detections.filter(detection => detection.class === "Rim");
+        let nearestObject = this.nearestHelper(args['OBJECT'], util);
+        if (nearestObject) {
+            return `(${nearestObject.x}, ${nearestObject.y})`;
         } else {
-            objects = this.detections;
-        }
-        if (objects.length != 0) {
-            for (const object of objects) {
-                const x = this.tfPositiontoScratch(object.position).x;
-                const y = this.tfPositiontoScratch(object.position).y;
-
-                // Calculate the distance from the current sprite position to the detection
-                const spriteX = util.target.x; // Current sprite x position
-                const spriteY = util.target.y; // Current sprite y position
-                const distance = Math.sqrt(Math.pow(x - spriteX, 2) + Math.pow(y - spriteY, 2));
-
-                // Update nearestDetection if this one is closer
-                if (distance < nearestDistance) {
-                    nearestDistance = distance;
-                    nearestDetection = { x, y }; // Store the coordinates of the nearest detection
-                }
-            }
-            return `(${nearestDetection.x}, ${nearestDetection.y})`;
+            return `No ${args['OBJECT']}s found!`;
         }
     }
 
     nearestPos(args, util) {
-        let nearestDetection = null;
-        let nearestDistance = Infinity;
-        let objects = [];
-        if (args['OBJECT'] === Object.BASKETBALL) {
-            objects = this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECT'] === Object.RIM) {
-            objects = this.detections.filter(detection => detection.class === "Rim");
-        } else {
-            objects = this.detections;
-        }
-        if (objects.length != 0) {
-            for (const object of objects) {
-                const x = this.tfPositiontoScratch(object.position).x;
-                const y = this.tfPositiontoScratch(object.position).y;
-
-                // Calculate the distance from the current sprite position to the detection
-                const spriteX = util.target.x; // Current sprite x position
-                const spriteY = util.target.y; // Current sprite y position
-                const distance = Math.sqrt(Math.pow(x - spriteX, 2) + Math.pow(y - spriteY, 2));
-
-                // Update nearestDetection if this one is closer
-                if (distance < nearestDistance) {
-                    nearestDistance = distance;
-                    nearestDetection = { x, y }; // Store the coordinates of the nearest detection
-                }
-            }
+        let nearestObject = this.nearestHelper(args['OBJECT'], util);
+        if (nearestObject) {
             if (args['AXIS'] === Axis.X) {
-                return nearestDetection.x;
+                return nearestObject.x;
             } else {
-                return nearestDetection.y;
+                return nearestObject.y;
             }
+        } else {
+            return `No ${args['OBJECT']}s found!`;
         }
     }
 
     objDist(args, util) {
-        let nearestObject1Detection = null;
-        let nearestObject2Detection = null;
-        let nearestObject1Distance = Infinity; //distance from sprite to object 1
-        let nearestObject2Distance = Infinity; //distance froms sprite to object 2
-        let objects1 = [];
-        let objects2 = [];
-        if (args['OBJECT1'] === Object.BASKETBALL) {
-            objects1 = this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECT1'] === Object.RIM) {
-            objects1 = this.detections.filter(detection => detection.class === "Rim");
+        let nearestObject1 = this.nearestHelper(args['OBJECT1'], util);
+        let nearestObject2 = this.nearestHelper(args['OBJECT2'], util);
+        if (nearestObject1 && nearestObject2) { //If nearest detections were found, return the distance between them
+            const distance = Math.sqrt(Math.pow(nearestObject1.x - nearestObject2.x, 2) + Math.pow(nearestObject1.y - nearestObject2.y, 2));
+            return distance.toFixed(2);
         } else {
-            objects1 = this.detections;
-        }
-        if (args['OBJECT2'] === Object.BASKETBALL) {
-            objects2= this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECT2'] === Object.RIM) {
-            objects2 = this.detections.filter(detection => detection.class === "Rim");
-        } else {
-            objects2 = this.detections;
-        }
-        if (objects1.length != 0 && objects2.length != 0) {
-            for (const object of objects1) {
-                const x = this.tfPositiontoScratch(object.position).x;
-                const y = this.tfPositiontoScratch(object.position).y;
-
-                // Calculate the distance from the current sprite position to the detection
-                const spriteX = util.target.x; // Current sprite x position
-                const spriteY = util.target.y; // Current sprite y position
-                const distance = Math.sqrt(Math.pow(x - spriteX, 2) + Math.pow(y - spriteY, 2));
-
-                // Update nearestDetection if this one is closer
-                if (distance < nearestObject1Distance) {
-                    nearestObject1Distance = distance;
-                    nearestObject1Detection = { x, y }; // Store the coordinates of the nearest detection
-                }
-            }
-            for (const object of objects2) {
-                const x = this.tfPositiontoScratch(object.position).x;
-                const y = this.tfPositiontoScratch(object.position).y;
-
-                // Calculate the distance from the current sprite position to the detection
-                const spriteX = util.target.x; // Current sprite x position
-                const spriteY = util.target.y; // Current sprite y position
-                const distance = Math.sqrt(Math.pow(x - spriteX, 2) + Math.pow(y - spriteY, 2));
-
-                // Update nearestDetection if this one is closer
-                if (distance < nearestObject2Distance) {
-                    nearestObject2Distance = distance;
-                    nearestObject2Detection = { x, y }; // Store the coordinates of the nearest detection
-                }
-            }
-            // If nearest detections were found, return the distance between them
-            if (nearestObject1Detection && nearestObject2Detection) {
-                const distance = Math.sqrt(Math.pow(nearestObject1Detection.x - nearestObject2Detection.x, 2) + Math.pow(nearestObject1Detection.y - nearestObject2Detection.y, 2));
-                return distance.toFixed(2);
-            }
+            return 0;
         }
     }
 
     objAngle(args, util) {
-        let nearestObject1Detection = null;
-        let nearestObject2Detection = null;
-        let nearestObject1Distance = Infinity; //distance from sprite to object 1
-        let nearestObject2Distance = Infinity; //distance froms sprite to object 2
-        let objects1 = [];
-        let objects2 = [];
-        if (args['OBJECT1'] === Object.BASKETBALL) {
-            objects1 = this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECT1'] === Object.RIM) {
-            objects1 = this.detections.filter(detection => detection.class === "Rim");
+        let nearestObject1 = this.nearestHelper(args['OBJECT1'], util);
+        let nearestObject2 = this.nearestHelper(args['OBJECT2'], util);
+        if (nearestObject1 && nearestObject2) { // If nearest detections were found, return the angle between them
+            const angle = Math.abs((Math.atan2((nearestObject2.y - nearestObject1.y), (nearestObject2.x - nearestObject1.x))) * (180 / Math.PI));
+            if (angle > 180) {
+                angle -= 180;
+            }
+            return `${angle.toFixed(2)}\u00B0`;
         } else {
-            objects1 = this.detections;
-        }
-        if (args['OBJECT2'] === Object.BASKETBALL) {
-            objects2= this.detections.filter(detection => detection.class === "Basketball");
-        } else if (args['OBJECT2'] === Object.RIM) {
-            objects2 = this.detections.filter(detection => detection.class === "Rim");
-        } else {
-            objects2 = this.detections;
-        }
-        if (objects1.length != 0 && objects2.length != 0) {
-            for (const object of objects1) {
-                const x = this.tfPositiontoScratch(object.position).x;
-                const y = this.tfPositiontoScratch(object.position).y;
-
-                // Calculate the distance from the current sprite position to the detection
-                const spriteX = util.target.x; // Current sprite x position
-                const spriteY = util.target.y; // Current sprite y position
-                const distance = Math.sqrt(Math.pow(x - spriteX, 2) + Math.pow(y - spriteY, 2));
-
-                // Update nearestDetection if this one is closer
-                if (distance < nearestObject1Distance) {
-                    nearestObject1Distance = distance;
-                    nearestObject1Detection = { x, y }; // Store the coordinates of the nearest detection
-                }
-            }
-            for (const object of objects2) {
-                const x = this.tfPositiontoScratch(object.position).x;
-                const y = this.tfPositiontoScratch(object.position).y;
-
-                // Calculate the distance from the current sprite position to the detection
-                const spriteX = util.target.x; // Current sprite x position
-                const spriteY = util.target.y; // Current sprite y position
-                const distance = Math.sqrt(Math.pow(x - spriteX, 2) + Math.pow(y - spriteY, 2));
-
-                // Update nearestDetection if this one is closer
-                if (distance < nearestObject2Distance) {
-                    nearestObject2Distance = distance;
-                    nearestObject2Detection = { x, y }; // Store the coordinates of the nearest detection
-                }
-            }
-            // If nearest detections were found, return the angle between them
-            if (nearestObject1Detection && nearestObject2Detection) {
-                const angle = Math.abs((Math.atan2((nearestObject2Detection.y - nearestObject1Detection.y), (nearestObject2Detection.x - nearestObject1Detection.x))) * (180 / Math.PI));
-                if (angle > 180) {
-                    angle -= 180;
-                }
-                return `${angle.toFixed(2)}\u00B0`;
-            }
+            return 0;
         }
     }
 
@@ -1407,6 +1174,44 @@ class Scratch3BballDetectBlocks {
         //11.25 is the half-height of the square, centering the coordinate within the square.
         //180 is half the Scratch coordinate system's total height (360), offsetting the coordinates by 180 since position 0 (topmost) is 180.
         return {x, y};
+    }
+
+    filterDetections(args) {
+        let filtered = [];
+        if (args === Object.BASKETBALL || args === Objects.BASKETBALL) {
+            filtered = this.detections.filter(detection => detection.class === "Basketball");
+        } else if (args === Object.RIM || args === Objects.RIM) {
+            filtered = this.detections.filter(detection => detection.class === "Rim");
+        } else {
+            filtered = this.detections;
+        }
+        return filtered;
+    }
+
+    nearestHelper(args, util) {
+        let nearestDetection = null;
+        let nearestDistance = Infinity;
+        let objects = this.filterDetections(args);
+        if (objects.length != 0) {
+            for (const object of objects) {
+                const x = this.tfPositiontoScratch(object.position).x;
+                const y = this.tfPositiontoScratch(object.position).y;
+
+                // Calculate the distance from the current sprite position to the detection
+                const spriteX = util.target.x; // Current sprite x position
+                const spriteY = util.target.y; // Current sprite y position
+                const distance = Math.sqrt(Math.pow(x - spriteX, 2) + Math.pow(y - spriteY, 2));
+
+                // Update nearestDetection if this one is closer
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestDetection = { x, y }; // Store the coordinates of the nearest detection
+                }
+            }
+            return nearestDetection;
+        } else {
+            return false;
+        }
     }
 
     /**

@@ -202,10 +202,10 @@ class Scratch3PoseNetBlocks {
         this.setVideoTransparency({
             TRANSPARENCY: this.globalVideoTransparency
         });
-        // this.videoToggle({
-        //     VIDEO_STATE: this.globalVideoState
-        // });
-        //uncomment to automatically start video upon extension load (commented due to Camera Settings extension)
+        this.videoToggle({
+            VIDEO_STATE: this.globalVideoState
+        });
+        //comment this.videoToggle({...}); to disable automatic video start upon extension load
     }
 
     reset () {
@@ -527,44 +527,43 @@ class Scratch3PoseNetBlocks {
                         },
                     }
                 },
-                '---',
                 {
                     opcode: 'numPeople',
                     text: 'number of people detected',
                     blockType: BlockType.REPORTER,
                     isTerminal: true
-                }
-
+                },
+                '---',
                 /// TODO::: set up confidence threshold setter!!!
-                // {
-                //     opcode: 'videoToggle',
-                //     text: formatMessage({
-                //         id: 'videoSensing.videoToggle',
-                //         default: 'turn video [VIDEO_STATE]',
-                //         description: 'Controls display of the video preview layer'
-                //     }),
-                //     arguments: {
-                //         VIDEO_STATE: {
-                //             type: ArgumentType.NUMBER,
-                //             menu: 'VIDEO_STATE',
-                //             defaultValue: VideoState.OFF
-                //         }
-                //     }
-                // },
-                // {
-                //     opcode: 'setVideoTransparency',
-                //     text: formatMessage({
-                //         id: 'videoSensing.setVideoTransparency',
-                //         default: 'set video transparency to [TRANSPARENCY]',
-                //         description: 'Controls transparency of the video preview layer'
-                //     }),
-                //     arguments: {
-                //         TRANSPARENCY: {
-                //             type: ArgumentType.NUMBER,
-                //             defaultValue: 50
-                //         }
-                //     }
-                // },
+                {
+                    opcode: 'videoToggle',
+                    text: formatMessage({
+                        id: 'videoSensing.videoToggle',
+                        default: 'turn video [VIDEO_STATE]',
+                        description: 'Controls display of the video preview layer'
+                    }),
+                    arguments: {
+                        VIDEO_STATE: {
+                            type: ArgumentType.NUMBER,
+                            menu: 'VIDEO_STATE',
+                            defaultValue: VideoState.OFF
+                        }
+                    }
+                },
+                {
+                    opcode: 'setVideoTransparency',
+                    text: formatMessage({
+                        id: 'videoSensing.setVideoTransparency',
+                        default: 'set video transparency to [TRANSPARENCY]',
+                        description: 'Controls transparency of the video preview layer'
+                    }),
+                    arguments: {
+                        TRANSPARENCY: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 50
+                        }
+                    }
+                },
             ],
             menus: {
                 PART: {
@@ -741,6 +740,8 @@ class Scratch3PoseNetBlocks {
         // this.poseState.keypoints.find(point => point.name === args['PART'])
         if (this.hasPose(args['PERSON_INDEX'])){
             return this.tfCoordsToScratch({x: this.poseStates[args['PERSON_INDEX']].keypoints.find(point => point.name === args['PART']).x}).x;
+        } else {
+            return 0;
         }
     }
 
@@ -752,6 +753,8 @@ class Scratch3PoseNetBlocks {
     posePositionY(args, util) {
         if (this.hasPose(args['PERSON_INDEX'])){
             return this.tfCoordsToScratch({y: this.poseStates[args['PERSON_INDEX']].keypoints.find(point => point.name === args['PART']).y}).y;
+        } else {
+            return 0;
         }
     }
 
@@ -796,6 +799,8 @@ class Scratch3PoseNetBlocks {
                 return ang123;
             }
             // return this.tfCoordsToScratch({y: this.poseState.keypoints.find(point => point.name === args['PART']).y}).y;
+        } else {
+            return 0;
         }
     }
 
@@ -806,6 +811,8 @@ class Scratch3PoseNetBlocks {
     numPeople() {
         if (this.hasAPose()) {
             return this.poseStates.length;
+        } else {
+            return 0;
         }
     }
 

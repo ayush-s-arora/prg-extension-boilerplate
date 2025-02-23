@@ -335,16 +335,20 @@ class MenuBar extends React.Component {
         // make sure user has logged into Google Drive
         if (!this.state.authToken) {
             this.doAuth(response => {
+                console.log("here")
+                console.log(response)
                 if (response.access_token) {
                     this.handleDriveAuthenticate(response.access_token);
                     this.handleClickDriveSave();
                 }
             });
+            console.log("we appear to be here")
             this.props.onRequestCloseFile();
             return;
         }
         // check if we have already created file
         let fileId = this.state.fileId;
+        console.log(fileId)
         if (!fileId) {
             if (this.isGoogleDriveReady()) {
                 let fileName = prompt("Name your project", this.props.projectTitle);
@@ -376,6 +380,8 @@ class MenuBar extends React.Component {
         this.setState({
             authToken: token
         });
+        console.log("we definitely should be here now...")
+        console.log(this.state.authToken)
     }
     getProjectTitleFromFilename (fileInputFilename) {
         if (!fileInputFilename) return '';

@@ -798,6 +798,9 @@ class Scratch3PoseNetBlocks {
                 // console.log(ang2);
                 return ang123;
             }
+            else {
+                return 0;
+            }
             // return this.tfCoordsToScratch({y: this.poseState.keypoints.find(point => point.name === args['PART']).y}).y;
         } else {
             return 0;
